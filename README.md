@@ -1,6 +1,6 @@
 # Trajectories for CosmoScout VR
 
-A CosmoSout VR plugin which draws trajectories of celestial bodies and spacecrafts. This plugin is built as part of CosmoScout's build process. See the [main repository](https://github.com/cosmoscout/cosmoscout-vr) for instructions.
+A CosmoSout VR plugin which draws trajectories of celestial bodies and spacecrafts. The color, length, number of samples and reference frame can be configured. This plugin is built as part of CosmoScout's build process. See the [main repository](https://github.com/cosmoscout/cosmoscout-vr) for instructions.
 
 ## Configuration
 
