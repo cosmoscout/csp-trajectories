@@ -15,9 +15,6 @@ add_library(csp-trajectories SHARED
 target_link_libraries(csp-trajectories
   PUBLIC
     cs-core
-    cs-graphics
-    cs-gui
-    cs-scene
 )
 
 # install plugin -----------------------------------------------------------------------------------
