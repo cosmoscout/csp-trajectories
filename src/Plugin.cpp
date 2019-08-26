@@ -94,8 +94,9 @@ void Plugin::init() {
           "There is no Anchor \"" + settings.first + "\" defined in the settings.");
     }
 
-    double tStartExistence = cs::utils::convert::toSpiceTime(anchor->second.mStartExistence);
-    double tEndExistence   = cs::utils::convert::toSpiceTime(anchor->second.mEndExistence);
+    auto existence = cs::utils::convert::getExistenceFromSettings(*anchor);
+    double tStartExistence = existence.first;
+    double tEndExistence = existence.second;
 
     // sun flare ---------------------------------------------------------------
     if (settings.second.mDrawFlare && *settings.second.mDrawFlare) {
