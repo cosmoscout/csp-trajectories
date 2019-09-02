@@ -16,7 +16,7 @@ namespace csp::trajectories {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const std::string SunFlare::QUAD_VERT = R"(
-#version 400 compatibility
+#version 330
 
 out vec2 vTexCoords;
 out float fDepth;
@@ -71,7 +71,7 @@ void main()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const std::string SunFlare::QUAD_FRAG = R"(
-#version 400 compatibility
+#version 330
 
 uniform vec3 uCcolor;
 uniform float uFarClip;
