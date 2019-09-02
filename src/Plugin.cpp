@@ -51,7 +51,7 @@ void from_json(const nlohmann::json& j, Plugin::Settings::Trajectory& o) {
   for (int i = 0; i < 3; ++i)
     o.mColor[i] = c.at(i);
 
-  o.mDrawDot = cs::core::parseOptional<bool>("drawDot", j);
+  o.mDrawDot   = cs::core::parseOptional<bool>("drawDot", j);
   o.mDrawFlare = cs::core::parseOptional<bool>("drawFlare", j);
 
   o.mTrail = cs::core::parseOptionalSection<Plugin::Settings::Trail>("trail", j);
@@ -87,9 +87,9 @@ void Plugin::init() {
           "There is no Anchor \"" + settings.first + "\" defined in the settings.");
     }
 
-    auto existence = cs::utils::convert::getExistenceFromSettings(*anchor);
+    auto   existence       = cs::utils::convert::getExistenceFromSettings(*anchor);
     double tStartExistence = existence.first;
-    double tEndExistence = existence.second;
+    double tEndExistence   = existence.second;
 
     // sun flare ---------------------------------------------------------------
     if (settings.second.mDrawFlare && *settings.second.mDrawFlare) {
