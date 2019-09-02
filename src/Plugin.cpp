@@ -51,27 +51,18 @@ void from_json(const nlohmann::json& j, Plugin::Settings::Trajectory& o) {
   for (int i = 0; i < 3; ++i)
     o.mColor[i] = c.at(i);
 
-  auto iter = j.find("drawDot");
-  if (iter != j.end()) {
-    o.mDrawDot = iter->get<std::optional<bool>>();
-  }
+  o.mDrawDot = cs::core::parseOptional<bool>("drawDot", j);
+  o.mDrawFlare = cs::core::parseOptional<bool>("drawFlare", j);
 
-  iter = j.find("drawFlare");
-  if (iter != j.end()) {
-    o.mDrawFlare = iter->get<std::optional<bool>>();
-  }
-
-  iter = j.find("trail");
-  if (iter != j.end()) {
-    o.mTrail = iter->get<std::optional<Plugin::Settings::Trail>>();
-  }
+  o.mTrail = cs::core::parseOptionalSection<Plugin::Settings::Trail>("trail", j);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(const nlohmann::json& j, Plugin::Settings& o) {
-  cs::core::parseSettingsSection("csp-trajectories.trajectories", [&] {
-    o.mTrajectories = j.at("trajectories").get<std::map<std::string, Plugin::Settings::Trajectory>>();
+  cs::core::parseSection("csp-trajectories", [&] {
+    o.mTrajectories =
+        cs::core::parseMap<std::string, Plugin::Settings::Trajectory>("trajectories", j);
   });
 }
 
