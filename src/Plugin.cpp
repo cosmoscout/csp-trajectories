@@ -38,10 +38,10 @@ namespace csp::trajectories {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(const nlohmann::json& j, Plugin::Settings::Trail& o) {
-  o.mLength       = j.at("length").get<double>();
-  o.mSamples      = j.at("samples").get<int32_t>();
-  o.mParentCenter = j.at("parentCenter").get<std::string>();
-  o.mParentFrame  = j.at("parentFrame").get<std::string>();
+  o.mLength       = cs::core::parseProperty<double>("length", j);
+  o.mSamples      = cs::core::parseProperty<int32_t>("samples", j);
+  o.mParentCenter = cs::core::parseProperty<std::string>("parentCenter", j);
+  o.mParentFrame  = cs::core::parseProperty<std::string>("parentFrame", j);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,9 @@ void from_json(const nlohmann::json& j, Plugin::Settings::Trajectory& o) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(const nlohmann::json& j, Plugin::Settings& o) {
-  o.mTrajectories = j.at("trajectories").get<std::map<std::string, Plugin::Settings::Trajectory>>();
+  cs::core::parseSettingsSection("csp-trajectories.trajectories", [&] {
+    o.mTrajectories = j.at("trajectories").get<std::map<std::string, Plugin::Settings::Trajectory>>();
+  });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
