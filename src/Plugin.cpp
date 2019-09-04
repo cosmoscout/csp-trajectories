@@ -12,8 +12,6 @@
 
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/SolarSystem.hpp"
-#include "../../../src/cs-utils/convert.hpp"
-#include "../../../src/cs-utils/utils.hpp"
 
 #include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
 #include <VistaKernel/GraphicsManager/VistaTransformNode.h>
@@ -38,10 +36,10 @@ namespace csp::trajectories {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(const nlohmann::json& j, Plugin::Settings::Trail& o) {
-  o.mLength       = j.at("length").get<double>();
-  o.mSamples      = j.at("samples").get<int32_t>();
-  o.mParentCenter = j.at("parentCenter").get<std::string>();
-  o.mParentFrame  = j.at("parentFrame").get<std::string>();
+  o.mLength       = cs::core::parseProperty<double>("length", j);
+  o.mSamples      = cs::core::parseProperty<int32_t>("samples", j);
+  o.mParentCenter = cs::core::parseProperty<std::string>("parentCenter", j);
+  o.mParentFrame  = cs::core::parseProperty<std::string>("parentFrame", j);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,26 +49,19 @@ void from_json(const nlohmann::json& j, Plugin::Settings::Trajectory& o) {
   for (int i = 0; i < 3; ++i)
     o.mColor[i] = c.at(i);
 
-  auto iter = j.find("drawDot");
-  if (iter != j.end()) {
-    o.mDrawDot = iter->get<std::optional<bool>>();
-  }
+  o.mDrawDot   = cs::core::parseOptional<bool>("drawDot", j);
+  o.mDrawFlare = cs::core::parseOptional<bool>("drawFlare", j);
 
-  iter = j.find("drawFlare");
-  if (iter != j.end()) {
-    o.mDrawFlare = iter->get<std::optional<bool>>();
-  }
-
-  iter = j.find("trail");
-  if (iter != j.end()) {
-    o.mTrail = iter->get<std::optional<Plugin::Settings::Trail>>();
-  }
+  o.mTrail = cs::core::parseOptionalSection<Plugin::Settings::Trail>("trail", j);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void from_json(const nlohmann::json& j, Plugin::Settings& o) {
-  o.mTrajectories = j.at("trajectories").get<std::map<std::string, Plugin::Settings::Trajectory>>();
+  cs::core::parseSection("csp-trajectories", [&] {
+    o.mTrajectories =
+        cs::core::parseMap<std::string, Plugin::Settings::Trajectory>("trajectories", j);
+  });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,8 +85,9 @@ void Plugin::init() {
           "There is no Anchor \"" + settings.first + "\" defined in the settings.");
     }
 
-    double tStartExistence = cs::utils::convert::toSpiceTime(anchor->second.mStartExistence);
-    double tEndExistence   = cs::utils::convert::toSpiceTime(anchor->second.mEndExistence);
+    auto   existence       = cs::core::getExistenceFromSettings(*anchor);
+    double tStartExistence = existence.first;
+    double tEndExistence   = existence.second;
 
     // sun flare ---------------------------------------------------------------
     if (settings.second.mDrawFlare && *settings.second.mDrawFlare) {
