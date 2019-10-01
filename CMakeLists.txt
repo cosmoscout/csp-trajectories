@@ -4,6 +4,12 @@
 #                         Copyright: (c) 2019 German Aerospace Center (DLR)                        #
 # ------------------------------------------------------------------------------------------------ #
 
+option(CSP_TRAJECTORIES "Enable compilation of this plugin" ON)
+
+if (NOT CSP_TRAJECTORIES)
+  return()
+endif()
+
 # build plugin -------------------------------------------------------------------------------------
 
 file(GLOB SOURCE_FILES src/*.cpp)
