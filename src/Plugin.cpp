@@ -7,7 +7,9 @@
 #include "Plugin.hpp"
 
 #include "DeepSpaceDot.hpp"
+#include "DeepSpaceDotRenderer.hpp"
 #include "SunFlare.hpp"
+#include "SunFlareRenderer.hpp"
 #include "Trajectory.hpp"
 
 #include "../../../src/cs-core/GuiManager.hpp"
@@ -98,13 +100,7 @@ void Plugin::init() {
       flare->pColor =
           VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
 
-      auto sunFlareNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), flare.get());
-
-      VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
-          sunFlareNode, static_cast<int>(cs::utils::DrawOrder::eAtmospheres) + 1);
-
       mSunFlares.push_back(flare);
-      mSunFlareNodes.push_back(sunFlareNode);
     }
 
     if (settings.second.mTrail) {
@@ -133,11 +129,6 @@ void Plugin::init() {
       dot->pColor =
           VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
 
-      auto deepSpaceDotNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), dot.get());
-      VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
-          deepSpaceDotNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
-      mDeepSpaceDotNodes.push_back(deepSpaceDotNode);
-
       // do not perform distance culling for DeepSpaceDots
       dot->pVisibleRadius = -1;
 
@@ -151,6 +142,18 @@ void Plugin::init() {
       mDeepSpaceDots.push_back(dot);
     }
   }
+
+  mDeepSpaceDotRenderer = std::make_unique<DeepSpaceDotRenderer>();
+  mDeepSpaceDotRenderer->setDeepSpaceDots(mDeepSpaceDots);
+  mDeepSpaceDotRenderNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), mDeepSpaceDotRenderer.get());
+  VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
+      mDeepSpaceDotRenderNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
+
+  mSunFlareRenderer = std::make_unique<SunFlareRenderer>();
+  mSunFlareRenderer->setSunFlares(mSunFlares);
+  mSunFlareRenderNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), mSunFlareRenderer.get());
+  VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
+      mSunFlareRenderNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) + 1);
 
   mGuiManager->addSettingsSectionToSideBarFromHTML("Trajectories", "radio_button_unchecked",
       "../share/resources/gui/trajectories-settings.html");
@@ -171,9 +174,8 @@ void Plugin::deInit() {
   for (auto const& flare : mSunFlares) {
     mSolarSystem->unregisterAnchor(flare);
   }
-  for (auto const& flareNode : mSunFlareNodes) {
-    mSceneGraph->GetRoot()->DisconnectChild(flareNode);
-  }
+
+  mSceneGraph->GetRoot()->DisconnectChild(mSunFlareRenderNode);
 
   for (auto const& trajectory : mTrajectories) {
     mSolarSystem->unregisterAnchor(trajectory);
@@ -185,9 +187,8 @@ void Plugin::deInit() {
   for (auto const& dot : mDeepSpaceDots) {
     mSolarSystem->unregisterAnchor(dot);
   }
-  for (auto const& deepSpaceDotNode : mDeepSpaceDotNodes) {
-    mSceneGraph->GetRoot()->DisconnectChild(deepSpaceDotNode);
-  }
+
+  mSceneGraph->GetRoot()->DisconnectChild(mDeepSpaceDotRenderNode);
 
   mGuiManager->getSideBar()->unregisterCallback("set_enable_trajectories");
   mGuiManager->getSideBar()->unregisterCallback("set_enable_planet_marks");

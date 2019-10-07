@@ -12,32 +12,26 @@
 #include "../../../src/cs-scene/CelestialObject.hpp"
 
 #include <VistaBase/VistaColor.h>
-#include <VistaKernel/GraphicsManager/VistaOpenGLDraw.h>
-#include <VistaOGLExt/VistaGLSLShader.h>
-#include <glm/glm.hpp>
 
 namespace csp::trajectories {
 
+class DeepSpaceDotRenderer;
+
 /// A deep space dot is a simple marker indicating the position of an object, when it is too
 /// small to see.
-class DeepSpaceDot : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
+class DeepSpaceDot : public cs::scene::CelestialObject {
+  friend DeepSpaceDotRenderer;
+
  public:
   cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1); ///< The color of the marker.
 
   DeepSpaceDot(std::shared_ptr<Plugin::Properties> const& properties,
       std::string const& sCenterName, std::string const& sFrameName, double tStartExistence,
       double tEndExistence);
-  ~DeepSpaceDot() override = default;
-
-  bool Do() override;
-  bool GetBoundingBox(VistaBoundingBox& bb) override;
+  virtual ~DeepSpaceDot() = default;
 
  private:
   std::shared_ptr<Plugin::Properties> mProperties;
-  VistaGLSLShader                     mShader;
-
-  static const std::string QUAD_VERT;
-  static const std::string QUAD_FRAG;
 };
 } // namespace csp::trajectories
 #endif // CSP_TRAJECTORIES_DEEP_SPACE_DOT_HPP

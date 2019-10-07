@@ -27,3 +27,4 @@ target_link_libraries(csp-trajectories
 
 install(TARGETS   csp-trajectories   DESTINATION "share/plugins")
 install(DIRECTORY "gui"              DESTINATION "share/resources")
+install(DIRECTORY "shaders"          DESTINATION "share/resources")

@@ -17,7 +17,9 @@
 namespace csp::trajectories {
 
 class DeepSpaceDot;
+class DeepSpaceDotRenderer;
 class SunFlare;
+class SunFlareRenderer;
 class Trajectory;
 
 /// This plugin is providing HUD elements that display trajectories and markers for orbiting
@@ -68,9 +70,14 @@ class Plugin : public cs::core::PluginBase {
   std::vector<std::shared_ptr<Trajectory>>   mTrajectories;
   std::vector<std::shared_ptr<DeepSpaceDot>> mDeepSpaceDots;
   std::vector<std::shared_ptr<SunFlare>>     mSunFlares;
+
   std::vector<VistaOpenGLNode*>              mTrajectoryNodes;
-  std::vector<VistaOpenGLNode*>              mDeepSpaceDotNodes;
-  std::vector<VistaOpenGLNode*>              mSunFlareNodes;
+
+  VistaOpenGLNode*                           mDeepSpaceDotRenderNode;
+  VistaOpenGLNode*                           mSunFlareRenderNode;
+
+  std::unique_ptr<DeepSpaceDotRenderer>      mDeepSpaceDotRenderer;
+  std::unique_ptr<SunFlareRenderer>          mSunFlareRenderer;
 };
 
 } // namespace csp::trajectories
