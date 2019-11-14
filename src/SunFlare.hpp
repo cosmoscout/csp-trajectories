@@ -16,6 +16,10 @@
 #include <VistaOGLExt/VistaGLSLShader.h>
 #include <glm/glm.hpp>
 
+namespace cs::core {
+class GraphicsEngine;
+} // namespace cs::core
+
 namespace csp::trajectories {
 
 /// Adds a flare effect around the object. Only makes sense for stars, but if you want you can
@@ -24,7 +28,8 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
  public:
   cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1); ///< The color of the flare.
 
-  SunFlare(std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
+  SunFlare(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
+      std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
       std::string const& sFrameName, double tStartExistence, double tEndExistence);
   ~SunFlare() override = default;
 
@@ -32,6 +37,8 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   bool GetBoundingBox(VistaBoundingBox& bb) override;
 
  private:
+  std::shared_ptr<cs::core::GraphicsEngine> mGraphicsEngine;
+
   std::shared_ptr<Plugin::Properties> mProperties;
   VistaGLSLShader                     mShader;
 

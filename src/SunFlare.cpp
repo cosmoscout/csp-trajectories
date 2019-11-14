@@ -6,6 +6,7 @@
 
 #include "SunFlare.hpp"
 
+#include "../../../src/cs-core/GraphicsEngine.hpp"
 #include "../../../src/cs-utils/FrameTimings.hpp"
 #include "../../../src/cs-utils/utils.hpp"
 
@@ -99,10 +100,11 @@ void main()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SunFlare::SunFlare(std::shared_ptr<Plugin::Properties> const& properties,
-    std::string const& sCenterName, std::string const& sFrameName, double tStartExistence,
-    double tEndExistence)
+SunFlare::SunFlare(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
+    std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
+    std::string const& sFrameName, double tStartExistence, double tEndExistence)
     : cs::scene::CelestialObject(sCenterName, sFrameName, tStartExistence, tEndExistence)
+    , mGraphicsEngine(graphicsEngine)
     , mProperties(properties) {
   mShader.InitVertexShaderFromString(QUAD_VERT);
   mShader.InitFragmentShaderFromString(QUAD_FRAG);
@@ -112,7 +114,8 @@ SunFlare::SunFlare(std::shared_ptr<Plugin::Properties> const& properties,
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool SunFlare::Do() {
-  if (mProperties->mEnableSunFlares.get() && getIsInExistence()) {
+  if (mProperties->mEnableSunFlares.get() && getIsInExistence() &&
+      !mGraphicsEngine->pEnableHDR.get()) {
     cs::utils::FrameTimings::ScopedTimer timer("SunFlare");
     // get viewport to draw dot with correct aspect ration
     GLint viewport[4];
