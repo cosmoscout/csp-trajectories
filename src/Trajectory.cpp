@@ -114,7 +114,7 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
       mLastUpdateTime = tTime;
 
       if (completeRecalculation) {
-        spdlog::debug("Recalculating Trajectory for {}...", mTargetCenter);
+        spdlog::debug("Recalculating trajectory for {}.", mTargetCenter);
       }
     }
 
