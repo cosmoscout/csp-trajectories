@@ -71,7 +71,7 @@ Plugin::Plugin()
     : mProperties(std::make_shared<Properties>()) {
 
   // Create default logger for this plugin.
-  cs::utils::logger::init("csp-trajectories");
+  spdlog::set_default_logger(cs::utils::logger::createLogger("csp-trajectories"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
