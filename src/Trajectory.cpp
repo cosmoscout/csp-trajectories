@@ -8,6 +8,7 @@
 
 #include "../../../src/cs-scene/CelestialObserver.hpp"
 #include "../../../src/cs-utils/FrameTimings.hpp"
+#include "../../../src/cs-utils/logger.hpp"
 
 namespace csp::trajectories {
 
@@ -113,7 +114,7 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
       mLastUpdateTime = tTime;
 
       if (completeRecalculation) {
-        std::cout << "Calculating Trajectory: " << mTargetCenter << std::endl;
+        spdlog::debug("Recalculating trajectory for {}.", mTargetCenter);
       }
     }
 
