@@ -201,7 +201,7 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("set_enable_trajectories");
   mGuiManager->getGui()->unregisterCallback("set_enable_planet_marks");
   mGuiManager->getGui()->unregisterCallback("set_enable_sun_flare");
-  
+
   spdlog::info("Unloading done.");
 }
 
