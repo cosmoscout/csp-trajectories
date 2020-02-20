@@ -12,6 +12,7 @@
 
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/SolarSystem.hpp"
+#include "../../../src/cs-utils/logger.hpp"
 
 #include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
 #include <VistaKernel/GraphicsManager/VistaTransformNode.h>
@@ -68,12 +69,16 @@ void from_json(const nlohmann::json& j, Plugin::Settings& o) {
 
 Plugin::Plugin()
     : mProperties(std::make_shared<Properties>()) {
+
+  // Create default logger for this plugin.
+  spdlog::set_default_logger(cs::utils::logger::createLogger("csp-trajectories"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::init() {
-  std::cout << "Loading: CosmoScout VR Plugin Trajectories" << std::endl;
+
+  spdlog::info("Loading plugin...");
 
   mPluginSettings = mAllSettings->mPlugins.at("csp-trajectories");
 
@@ -163,11 +168,15 @@ void Plugin::init() {
 
   mGuiManager->getGui()->registerCallback<bool>(
       "set_enable_sun_flare", ([this](bool value) { mProperties->mEnableSunFlares = value; }));
+
+  spdlog::info("Loading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::deInit() {
+  spdlog::info("Unloading plugin...");
+
   for (auto const& flare : mSunFlares) {
     mSolarSystem->unregisterAnchor(flare);
   }
@@ -192,6 +201,8 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("set_enable_trajectories");
   mGuiManager->getGui()->unregisterCallback("set_enable_planet_marks");
   mGuiManager->getGui()->unregisterCallback("set_enable_sun_flare");
+
+  spdlog::info("Unloading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
