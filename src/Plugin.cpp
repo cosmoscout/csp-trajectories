@@ -160,8 +160,8 @@ void Plugin::init() {
   mGuiManager->addSettingsSectionToSideBarFromHTML("Trajectories", "radio_button_unchecked",
       "../share/resources/gui/trajectories-settings.html");
 
-  mGuiManager->getGui()->registerCallback<bool>("setEnableTrajectories",
-      ([this](bool value) { mProperties->mEnableTrajectories = value; }));
+  mGuiManager->getGui()->registerCallback<bool>(
+      "setEnableTrajectories", ([this](bool value) { mProperties->mEnableTrajectories = value; }));
 
   mGuiManager->getGui()->registerCallback<bool>(
       "setEnablePlanetMarks", ([this](bool value) { mProperties->mEnablePlanetMarks = value; }));
