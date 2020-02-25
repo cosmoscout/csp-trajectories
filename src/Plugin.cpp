@@ -160,14 +160,14 @@ void Plugin::init() {
   mGuiManager->addSettingsSectionToSideBarFromHTML("Trajectories", "radio_button_unchecked",
       "../share/resources/gui/trajectories-settings.html");
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "setEnableTrajectories", ([this](bool value) { mProperties->mEnableTrajectories = value; }));
+  mGuiManager->getGui()->registerCallback<bool>("trajectories.setEnableTrajectories",
+      ([this](bool value) { mProperties->mEnableTrajectories = value; }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "setEnablePlanetMarks", ([this](bool value) { mProperties->mEnablePlanetMarks = value; }));
+  mGuiManager->getGui()->registerCallback<bool>("trajectories.setEnablePlanetMarks",
+      ([this](bool value) { mProperties->mEnablePlanetMarks = value; }));
 
-  mGuiManager->getGui()->registerCallback<bool>(
-      "setEnableSunFlare", ([this](bool value) { mProperties->mEnableSunFlares = value; }));
+  mGuiManager->getGui()->registerCallback<bool>("trajectories.setEnableSunFlare",
+      ([this](bool value) { mProperties->mEnableSunFlares = value; }));
 
   spdlog::info("Loading done.");
 }
@@ -198,9 +198,9 @@ void Plugin::deInit() {
     mSceneGraph->GetRoot()->DisconnectChild(deepSpaceDotNode);
   }
 
-  mGuiManager->getGui()->unregisterCallback("setEnableTrajectories");
-  mGuiManager->getGui()->unregisterCallback("setEnablePlanetMarks");
-  mGuiManager->getGui()->unregisterCallback("setEnableSunFlare");
+  mGuiManager->getGui()->unregisterCallback("trajectories.setEnableTrajectories");
+  mGuiManager->getGui()->unregisterCallback("trajectories.setEnablePlanetMarks");
+  mGuiManager->getGui()->unregisterCallback("trajectories.setEnableSunFlare");
 
   spdlog::info("Unloading done.");
 }
