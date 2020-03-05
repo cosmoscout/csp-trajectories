@@ -160,14 +160,14 @@ void Plugin::init() {
   mGuiManager->addSettingsSectionToSideBarFromHTML("Trajectories", "radio_button_unchecked",
       "../share/resources/gui/trajectories-settings.html");
 
-  mGuiManager->getGui()->registerCallback<bool>("trajectories.setEnableTrajectories",
-      ([this](bool value) { mProperties->mEnableTrajectories = value; }));
+  mGuiManager->getGui()->registerCallback("trajectories.setEnableTrajectories",
+      std::function([this](bool value) { mProperties->mEnableTrajectories = value; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("trajectories.setEnablePlanetMarks",
-      ([this](bool value) { mProperties->mEnablePlanetMarks = value; }));
+  mGuiManager->getGui()->registerCallback("trajectories.setEnablePlanetMarks",
+      std::function([this](bool value) { mProperties->mEnablePlanetMarks = value; }));
 
-  mGuiManager->getGui()->registerCallback<bool>("trajectories.setEnableSunFlare",
-      ([this](bool value) { mProperties->mEnableSunFlares = value; }));
+  mGuiManager->getGui()->registerCallback("trajectories.setEnableSunFlare",
+      std::function([this](bool value) { mProperties->mEnableSunFlares = value; }));
 
   spdlog::info("Loading done.");
 }
