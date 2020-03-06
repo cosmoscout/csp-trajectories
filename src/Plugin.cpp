@@ -161,12 +161,15 @@ void Plugin::init() {
       "../share/resources/gui/trajectories-settings.html");
 
   mGuiManager->getGui()->registerCallback("trajectories.setEnableTrajectories",
+      "Enables or disables the rendering of trajectories.",
       std::function([this](bool value) { mProperties->mEnableTrajectories = value; }));
 
   mGuiManager->getGui()->registerCallback("trajectories.setEnablePlanetMarks",
+      "Enables or disables the rendering of points marking the position of the planets.",
       std::function([this](bool value) { mProperties->mEnablePlanetMarks = value; }));
 
   mGuiManager->getGui()->registerCallback("trajectories.setEnableSunFlare",
+      "Enables or disables the rendering of a glare around the sun.",
       std::function([this](bool value) { mProperties->mEnableSunFlares = value; }));
 
   spdlog::info("Loading done.");
