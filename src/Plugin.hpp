@@ -21,9 +21,8 @@ class SunFlare;
 class Trajectory;
 
 /// This plugin is providing HUD elements that display trajectories and markers for orbiting
-/// objects.
-/// The configuration of this plugin is done via the provided json config. See README.md for
-/// details.
+/// objects. The configuration of this plugin is done via the provided json config. See README.md
+/// for details.
 class Plugin : public cs::core::PluginBase {
  public:
   /// Runtime properties for enabling and disabling features.
@@ -36,24 +35,39 @@ class Plugin : public cs::core::PluginBase {
   struct Settings {
     /// Settings for a trail behind an object.
     struct Trail {
-      double  mLength;           ///< The length of the trail in days.
-      int32_t mSamples;          ///< The amount of samples that make the trail up. The higher
-                                 ///< the better it looks, but the worse the performance gets.
-      std::string mParentCenter; ///< The spice name of the parents center.
-      std::string mParentFrame;  ///< The spice name of the parents frame.
+
+      /// The length of the trail in days.
+      double mLength;
+
+      /// The amount of samples that make the trail up. The higher the better it looks, but the
+      /// worse the performance gets.
+      int32_t mSamples;
+
+      /// The spice name of the parents center.
+      std::string mParentCenter;
+
+      /// The spice name of the parents frame.
+      std::string mParentFrame;
     };
 
     /// The root settings for a single trajectory.
     struct Trajectory {
-      glm::vec3           mColor;     ///< Specifies the color of the trail and dot.
-      std::optional<bool> mDrawDot;   ///< If available and true a dot will indicate the
-                                      ///< objects position.
-      std::optional<bool> mDrawFlare; ///< If available and true a flare will be drawn around
-                                      ///< the object.
-      std::optional<Trail> mTrail;    ///< If available a trail will be drawn behind the object.
+
+      /// Specifies the color of the trail and dot.
+      glm::vec3 mColor;
+
+      /// If available and true a dot will indicate the objects position.
+      std::optional<bool> mDrawDot;
+
+      /// If available and true a flare will be drawn around the object.
+      std::optional<bool> mDrawFlare;
+
+      /// If available a trail will be drawn behind the object.
+      std::optional<Trail> mTrail;
     };
 
-    std::map<std::string, Trajectory> mTrajectories; ///< All trajectories with their name as key.
+    /// All trajectories with their name as key.
+    std::map<std::string, Trajectory> mTrajectories;
   };
 
   Plugin();
