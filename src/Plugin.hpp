@@ -39,7 +39,7 @@ class Plugin : public cs::core::PluginBase {
       /// The length of the trail in days.
       double mLength;
 
-      /// The amount of samples that make the trail up. The higher the better it looks, but the
+      /// The amount of samples that make up the trail. The higher the better it looks, but the
       /// worse the performance gets.
       int32_t mSamples;
 
