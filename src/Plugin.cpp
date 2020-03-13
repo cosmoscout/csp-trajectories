@@ -96,7 +96,7 @@ void Plugin::init() {
 
     // sun flare ---------------------------------------------------------------
     if (settings.second.mDrawFlare && *settings.second.mDrawFlare) {
-      auto flare = std::make_shared<SunFlare>(mProperties, anchor->second.mCenter,
+      auto flare = std::make_shared<SunFlare>(mGraphicsEngine, mProperties, anchor->second.mCenter,
           anchor->second.mFrame, tStartExistence, tEndExistence);
       mSolarSystem->registerAnchor(flare);
 

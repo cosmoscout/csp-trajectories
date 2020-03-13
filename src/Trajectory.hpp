@@ -21,9 +21,11 @@ namespace csp::trajectories {
 /// A trajectory trails behind an object in space to give a better understanding of its movement.
 class Trajectory : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
  public:
-  cs::utils::Property<double> pLength = 1.0;                    ///< The length of the trajectory
-                                                                ///< in days.
-  cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1); ///< The color of the trajectory.
+  /// The length of the trajectory in days.
+  cs::utils::Property<double> pLength = 1.0;
+
+  /// The color of the trajectory.
+  cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1);
 
   Trajectory(std::shared_ptr<Plugin::Properties> const& properties,
       std::string const& sTargetCenter, std::string const& sTargetFrame,
@@ -31,6 +33,7 @@ class Trajectory : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
       double tStartExistence, double tEndExistence);
   ~Trajectory() override = default;
 
+  /// This is called automatically by the SolarSystem.
   void update(double tTime, cs::scene::CelestialObserver const& oObs) override;
 
   bool Do() override;
@@ -51,5 +54,7 @@ class Trajectory : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
 
   bool mTrailIsInExistence = false;
 };
+
 } // namespace csp::trajectories
+
 #endif // CSP_TRAJECTORIES_TRAJECTORY_HPP

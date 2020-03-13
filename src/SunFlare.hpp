@@ -16,15 +16,22 @@
 #include <VistaOGLExt/VistaGLSLShader.h>
 #include <glm/glm.hpp>
 
+namespace cs::core {
+class GraphicsEngine;
+} // namespace cs::core
+
 namespace csp::trajectories {
 
-/// Adds a flare effect around the object. Only makes sense for stars, but if you want you can
-/// make anything glow like a christmas light :D
+/// Adds an artificial flare effect around the object. Only makes sense for stars, but if you want
+/// you can make anything glow like a christmas light :D. The SunFlare is hidden when HDR rendering
+/// is enabled.
 class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
  public:
-  cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1); ///< The color of the flare.
+  /// The color of the flare.
+  cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1);
 
-  SunFlare(std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
+  SunFlare(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
+      std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
       std::string const& sFrameName, double tStartExistence, double tEndExistence);
   ~SunFlare() override = default;
 
@@ -32,11 +39,15 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   bool GetBoundingBox(VistaBoundingBox& bb) override;
 
  private:
+  std::shared_ptr<cs::core::GraphicsEngine> mGraphicsEngine;
+
   std::shared_ptr<Plugin::Properties> mProperties;
   VistaGLSLShader                     mShader;
 
   static const std::string QUAD_VERT;
   static const std::string QUAD_FRAG;
 };
+
 } // namespace csp::trajectories
+
 #endif // CSP_TRAJECTORIES_SUN_FLARE_HPP
