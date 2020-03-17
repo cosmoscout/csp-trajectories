@@ -79,12 +79,12 @@ class Plugin : public cs::core::PluginBase {
   Settings                    mPluginSettings;
   std::shared_ptr<Properties> mProperties;
 
-  std::vector<std::shared_ptr<Trajectory>>   mTrajectories;
-  std::vector<std::shared_ptr<DeepSpaceDot>> mDeepSpaceDots;
-  std::vector<std::shared_ptr<SunFlare>>     mSunFlares;
-  std::vector<VistaOpenGLNode*>              mTrajectoryNodes;
-  std::vector<VistaOpenGLNode*>              mDeepSpaceDotNodes;
-  std::vector<VistaOpenGLNode*>              mSunFlareNodes;
+  std::vector<std::shared_ptr<Trajectory>>      mTrajectories;
+  std::vector<std::shared_ptr<DeepSpaceDot>>    mDeepSpaceDots;
+  std::vector<std::shared_ptr<SunFlare>>        mSunFlares;
+  std::vector<std::unique_ptr<VistaOpenGLNode>> mTrajectoryNodes;
+  std::vector<std::unique_ptr<VistaOpenGLNode>> mDeepSpaceDotNodes;
+  std::vector<std::unique_ptr<VistaOpenGLNode>> mSunFlareNodes;
 };
 
 } // namespace csp::trajectories
