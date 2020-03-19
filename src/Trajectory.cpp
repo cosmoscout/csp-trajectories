@@ -26,12 +26,12 @@ Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> const& properties,
     , mSamples(uSamples)
     , mStartIndex(0)
     , mLastUpdateTime(-1.0) {
-  pLength.onChange().connect([this](double val) {
+  pLength.connect([this](double val) {
     mPoints.clear();
     mTrajectory.setMaxAge(val * 24 * 60 * 60);
   });
 
-  pColor.onChange().connect([this](VistaColor const& val) {
+  pColor.connect([this](VistaColor const& val) {
     mTrajectory.setStartColor(glm::vec4(val[0], val[1], val[2], 1.f));
     mTrajectory.setEndColor(glm::vec4(val[0], val[1], val[2], 0.f));
   });
