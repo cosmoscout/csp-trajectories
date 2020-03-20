@@ -101,9 +101,7 @@ void Plugin::init() {
           "There is no Anchor \"" + settings.first + "\" defined in the settings.");
     }
 
-    auto   existence       = cs::core::getExistenceFromSettings(*anchor);
-    double tStartExistence = existence.first;
-    double tEndExistence   = existence.second;
+    auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
 
     // sun flare ---------------------------------------------------------------
     if (settings.second.mDrawFlare && *settings.second.mDrawFlare) {
