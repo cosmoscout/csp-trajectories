@@ -36,33 +36,44 @@ namespace csp::trajectories {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void from_json(const nlohmann::json& j, Plugin::Settings::Trail& o) {
-  o.mLength       = cs::core::parseProperty<double>("length", j);
-  o.mSamples      = cs::core::parseProperty<int32_t>("samples", j);
-  o.mParentCenter = cs::core::parseProperty<std::string>("parentCenter", j);
-  o.mParentFrame  = cs::core::parseProperty<std::string>("parentFrame", j);
+void from_json(nlohmann::json const& j, Plugin::Settings::Trail& o) {
+  cs::core::Settings::deserialize(j, "length", o.mLength);
+  cs::core::Settings::deserialize(j, "samples", o.mSamples);
+  cs::core::Settings::deserialize(j, "parentCenter", o.mParentCenter);
+  cs::core::Settings::deserialize(j, "parentFrame", o.mParentFrame);
+}
+
+void to_json(nlohmann::json& j, Plugin::Settings::Trail const& o) {
+  cs::core::Settings::serialize(j, "length", o.mLength);
+  cs::core::Settings::serialize(j, "samples", o.mSamples);
+  cs::core::Settings::serialize(j, "parentCenter", o.mParentCenter);
+  cs::core::Settings::serialize(j, "parentFrame", o.mParentFrame);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void from_json(const nlohmann::json& j, Plugin::Settings::Trajectory& o) {
-  nlohmann::json c = j.at("color");
-  for (int i = 0; i < 3; ++i)
-    o.mColor[i] = c.at(i);
+void from_json(nlohmann::json const& j, Plugin::Settings::Trajectory& o) {
+  cs::core::Settings::deserialize(j, "color", o.mColor);
+  cs::core::Settings::deserialize(j, "drawDot", o.mDrawDot);
+  cs::core::Settings::deserialize(j, "drawFlare", o.mDrawFlare);
+  cs::core::Settings::deserialize(j, "trail", o.mTrail);
+}
 
-  o.mDrawDot   = cs::core::parseOptional<bool>("drawDot", j);
-  o.mDrawFlare = cs::core::parseOptional<bool>("drawFlare", j);
-
-  o.mTrail = cs::core::parseOptionalSection<Plugin::Settings::Trail>("trail", j);
+void to_json(nlohmann::json& j, Plugin::Settings::Trajectory const& o) {
+  cs::core::Settings::serialize(j, "color", o.mColor);
+  cs::core::Settings::serialize(j, "drawDot", o.mDrawDot);
+  cs::core::Settings::serialize(j, "drawFlare", o.mDrawFlare);
+  cs::core::Settings::serialize(j, "trail", o.mTrail);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void from_json(const nlohmann::json& j, Plugin::Settings& o) {
-  cs::core::parseSection("csp-trajectories", [&] {
-    o.mTrajectories =
-        cs::core::parseMap<std::string, Plugin::Settings::Trajectory>("trajectories", j);
-  });
+void from_json(nlohmann::json const& j, Plugin::Settings& o) {
+  cs::core::Settings::deserialize(j, "trajectories", o.mTrajectories);
+}
+
+void to_json(nlohmann::json& j, Plugin::Settings const& o) {
+  cs::core::Settings::serialize(j, "trajectories", o.mTrajectories);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
