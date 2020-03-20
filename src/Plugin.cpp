@@ -120,7 +120,7 @@ void Plugin::init() {
           sunFlareNode, static_cast<int>(cs::utils::DrawOrder::eAtmospheres) + 1);
 
       mSunFlares.push_back(flare);
-      mSunFlareNodes.push_back(sunFlareNode);
+      mSunFlareNodes.emplace_back(sunFlareNode);
     }
 
     if (settings.second.mTrail) {
@@ -137,8 +137,8 @@ void Plugin::init() {
       auto trajectoryNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), trajectory.get());
       VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
           trajectoryNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
-      mTrajectoryNodes.push_back(trajectoryNode);
       mTrajectories.push_back(trajectory);
+      mTrajectoryNodes.emplace_back(trajectoryNode);
     }
 
     if (settings.second.mDrawDot && *settings.second.mDrawDot) {
@@ -152,7 +152,7 @@ void Plugin::init() {
       auto deepSpaceDotNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), dot.get());
       VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
           deepSpaceDotNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
-      mDeepSpaceDotNodes.push_back(deepSpaceDotNode);
+      mDeepSpaceDotNodes.emplace_back(deepSpaceDotNode);
 
       // do not perform distance culling for DeepSpaceDots
       dot->pVisibleRadius = -1;
@@ -195,22 +195,24 @@ void Plugin::deInit() {
     mSolarSystem->unregisterAnchor(flare);
   }
   for (auto const& flareNode : mSunFlareNodes) {
-    mSceneGraph->GetRoot()->DisconnectChild(flareNode);
+    mSceneGraph->GetRoot()->DisconnectChild(flareNode.get());
   }
 
   for (auto const& trajectory : mTrajectories) {
     mSolarSystem->unregisterAnchor(trajectory);
   }
   for (auto const& trajectoryNode : mTrajectoryNodes) {
-    mSceneGraph->GetRoot()->DisconnectChild(trajectoryNode);
+    mSceneGraph->GetRoot()->DisconnectChild(trajectoryNode.get());
   }
 
   for (auto const& dot : mDeepSpaceDots) {
     mSolarSystem->unregisterAnchor(dot);
   }
   for (auto const& deepSpaceDotNode : mDeepSpaceDotNodes) {
-    mSceneGraph->GetRoot()->DisconnectChild(deepSpaceDotNode);
+    mSceneGraph->GetRoot()->DisconnectChild(deepSpaceDotNode.get());
   }
+
+  mGuiManager->removeSettingsSection("Trajectories");
 
   mGuiManager->getGui()->unregisterCallback("trajectories.setEnableTrajectories");
   mGuiManager->getGui()->unregisterCallback("trajectories.setEnablePlanetMarks");
