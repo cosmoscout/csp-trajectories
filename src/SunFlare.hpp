@@ -17,7 +17,7 @@
 #include <glm/glm.hpp>
 
 namespace cs::core {
-class GraphicsEngine;
+class Settings;
 } // namespace cs::core
 
 namespace csp::trajectories {
@@ -30,7 +30,7 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   /// The color of the flare.
   cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1);
 
-  SunFlare(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
+  SunFlare(std::shared_ptr<cs::core::Settings> const& settings,
       std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
       std::string const& sFrameName, double tStartExistence, double tEndExistence);
   ~SunFlare() override = default;
@@ -39,7 +39,7 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   bool GetBoundingBox(VistaBoundingBox& bb) override;
 
  private:
-  std::shared_ptr<cs::core::GraphicsEngine> mGraphicsEngine;
+  std::shared_ptr<cs::core::Settings> mSettings;
 
   std::shared_ptr<Plugin::Properties> mProperties;
   VistaGLSLShader                     mShader;
