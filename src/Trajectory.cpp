@@ -6,6 +6,8 @@
 
 #include "Trajectory.hpp"
 
+#include <utility>
+
 #include "../../../src/cs-scene/CelestialObserver.hpp"
 #include "../../../src/cs-utils/FrameTimings.hpp"
 #include "../../../src/cs-utils/logger.hpp"
@@ -14,14 +16,13 @@ namespace csp::trajectories {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> const& properties,
-    std::string const& sTargetCenter, std::string const& sTargetFrame,
-    std::string const& sParentCenter, std::string const& sParentFrame, unsigned uSamples,
-    double tStartExistence, double tEndExistence)
+Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> properties, std::string sTargetCenter,
+    std::string sTargetFrame, std::string const& sParentCenter, std::string const& sParentFrame,
+    unsigned uSamples, double tStartExistence, double tEndExistence)
     : cs::scene::CelestialObject(sParentCenter, sParentFrame, tStartExistence, tEndExistence)
-    , mProperties(properties)
-    , mTargetCenter(sTargetCenter)
-    , mTargetFrame(sTargetFrame)
+    , mProperties(std::move(properties))
+    , mTargetCenter(std::move(sTargetCenter))
+    , mTargetFrame(std::move(sTargetFrame))
     , mPoints()
     , mSamples(uSamples)
     , mStartIndex(0)

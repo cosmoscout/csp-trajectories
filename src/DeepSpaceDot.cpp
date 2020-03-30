@@ -10,6 +10,7 @@
 #include "../../../src/cs-utils/utils.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <utility>
 
 namespace csp::trajectories {
 
@@ -93,11 +94,11 @@ void main()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DeepSpaceDot::DeepSpaceDot(std::shared_ptr<Plugin::Properties> const& properties,
+DeepSpaceDot::DeepSpaceDot(std::shared_ptr<Plugin::Properties> properties,
     std::string const& sCenterName, std::string const& sFrameName, double tStartExistence,
     double tEndExistence)
     : cs::scene::CelestialObject(sCenterName, sFrameName, tStartExistence, tEndExistence)
-    , mProperties(properties) {
+    , mProperties(std::move(properties)) {
   mShader.InitVertexShaderFromString(QUAD_VERT);
   mShader.InitFragmentShaderFromString(QUAD_FRAG);
   mShader.Link();

@@ -30,8 +30,8 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   /// The color of the flare.
   cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1);
 
-  SunFlare(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-      std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
+  SunFlare(std::shared_ptr<cs::core::GraphicsEngine> graphicsEngine,
+      std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
       std::string const& sFrameName, double tStartExistence, double tEndExistence);
   ~SunFlare() override = default;
 

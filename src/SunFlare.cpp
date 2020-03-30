@@ -11,6 +11,7 @@
 #include "../../../src/cs-utils/utils.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <utility>
 
 namespace csp::trajectories {
 
@@ -100,12 +101,12 @@ void main()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SunFlare::SunFlare(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-    std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
+SunFlare::SunFlare(std::shared_ptr<cs::core::GraphicsEngine> graphicsEngine,
+    std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
     std::string const& sFrameName, double tStartExistence, double tEndExistence)
     : cs::scene::CelestialObject(sCenterName, sFrameName, tStartExistence, tEndExistence)
-    , mGraphicsEngine(graphicsEngine)
-    , mProperties(properties) {
+    , mGraphicsEngine(std::move(graphicsEngine))
+    , mProperties(std::move(properties)) {
   mShader.InitVertexShaderFromString(QUAD_VERT);
   mShader.InitFragmentShaderFromString(QUAD_FRAG);
   mShader.Link();

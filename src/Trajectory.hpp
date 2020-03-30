@@ -27,10 +27,9 @@ class Trajectory : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   /// The color of the trajectory.
   cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1);
 
-  Trajectory(std::shared_ptr<Plugin::Properties> const& properties,
-      std::string const& sTargetCenter, std::string const& sTargetFrame,
-      std::string const& sParentCenter, std::string const& sParentFrame, unsigned uSamples,
-      double tStartExistence, double tEndExistence);
+  Trajectory(std::shared_ptr<Plugin::Properties> properties, std::string sTargetCenter,
+      std::string sTargetFrame, std::string const& sParentCenter, std::string const& sParentFrame,
+      unsigned uSamples, double tStartExistence, double tEndExistence);
   ~Trajectory() override = default;
 
   /// This is called automatically by the SolarSystem.
@@ -48,9 +47,9 @@ class Trajectory : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   std::vector<glm::dvec4> mPoints;
   unsigned                mSamples;
   int                     mStartIndex;
-  double                  mLastSampleTime;
+  double                  mLastSampleTime{};
   double                  mLastUpdateTime;
-  double                  mLastFrameTime;
+  double                  mLastFrameTime{};
 
   bool mTrailIsInExistence = false;
 };

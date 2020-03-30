@@ -24,9 +24,8 @@ class DeepSpaceDot : public cs::scene::CelestialObject, public IVistaOpenGLDraw 
  public:
   cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1); ///< The color of the marker.
 
-  DeepSpaceDot(std::shared_ptr<Plugin::Properties> const& properties,
-      std::string const& sCenterName, std::string const& sFrameName, double tStartExistence,
-      double tEndExistence);
+  DeepSpaceDot(std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
+      std::string const& sFrameName, double tStartExistence, double tEndExistence);
   ~DeepSpaceDot() override = default;
 
   bool Do() override;
