@@ -147,7 +147,7 @@ bool DeepSpaceDot::Do() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool DeepSpaceDot::GetBoundingBox(VistaBoundingBox&  /*bb*/) {
+bool DeepSpaceDot::GetBoundingBox(VistaBoundingBox& /*bb*/) {
   return false;
 }
 
