@@ -10,7 +10,6 @@
 
 #include "../../../src/cs-scene/CelestialObserver.hpp"
 #include "../../../src/cs-utils/FrameTimings.hpp"
-#include "../../../src/cs-utils/logger.hpp"
 
 namespace csp::trajectories {
 
@@ -23,7 +22,6 @@ Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> properties, std::stri
     , mProperties(std::move(properties))
     , mTargetCenter(std::move(sTargetCenter))
     , mTargetFrame(std::move(sTargetFrame))
-    , mPoints()
     , mSamples(uSamples)
     , mStartIndex(0)
     , mLastUpdateTime(-1.0) {
@@ -33,8 +31,8 @@ Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> properties, std::stri
   });
 
   pColor.connect([this](VistaColor const& val) {
-    mTrajectory.setStartColor(glm::vec4(val[0], val[1], val[2], 1.f));
-    mTrajectory.setEndColor(glm::vec4(val[0], val[1], val[2], 0.f));
+    mTrajectory.setStartColor(glm::vec4(val[0], val[1], val[2], 1.F));
+    mTrajectory.setEndColor(glm::vec4(val[0], val[1], val[2], 0.F));
   });
 
   mTrajectory.setUseLinearDepthBuffer(true);
@@ -83,7 +81,7 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
 
             pVisibleRadius = std::max(glm::length(pos), pVisibleRadius.get());
 
-            mStartIndex = (mStartIndex + 1) % mSamples;
+            mStartIndex = (mStartIndex + 1) % static_cast<int>(mSamples);
           } catch (...) {
             // data might be unavailable
           }
@@ -104,7 +102,8 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
             mPoints[(mStartIndex - 1 + mSamples) % mSamples] =
                 glm::dvec4(pos.x, pos.y, pos.z, tSampleTime);
 
-            mStartIndex    = (mStartIndex - 1 + mSamples) % mSamples;
+            mStartIndex =
+                (mStartIndex - 1 + static_cast<int>(mSamples)) % static_cast<int>(mSamples);
             pVisibleRadius = std::max(glm::length(pos), pVisibleRadius.get());
           } catch (...) {
             // data might be unavailable
@@ -141,7 +140,7 @@ bool Trajectory::Do() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Trajectory::GetBoundingBox(VistaBoundingBox& bb) {
+bool Trajectory::GetBoundingBox(VistaBoundingBox& /*bb*/) {
   return false;
 }
 

@@ -16,7 +16,7 @@ namespace csp::trajectories {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const std::string DeepSpaceDot::QUAD_VERT = R"(
+const char* DeepSpaceDot::QUAD_VERT = R"(
 #version 330
 
 out vec2 vTexCoords;
@@ -70,7 +70,7 @@ void main()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const std::string DeepSpaceDot::QUAD_FRAG = R"(
+const char* DeepSpaceDot::QUAD_FRAG = R"(
 #version 330
 
 uniform vec3 uCcolor;
@@ -110,15 +110,16 @@ bool DeepSpaceDot::Do() {
   if (mProperties->mEnablePlanetMarks.get() && getIsInExistence() && pVisible.get()) {
     cs::utils::FrameTimings::ScopedTimer timer("Planet Marks");
     // get viewport to draw dot with correct aspect ration
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    float fAspect = 1.f * viewport[2] / viewport[3];
+    std::array<GLint, 4> viewport{};
+    glGetIntegerv(GL_VIEWPORT, viewport.data());
+    float fAspect = 1.F * viewport.at(2) / viewport.at(3);
 
     // get model view and projection matrices
-    GLfloat glMatMV[16], glMatP[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, &glMatMV[0]);
-    glGetFloatv(GL_PROJECTION_MATRIX, &glMatP[0]);
-    auto matMV = glm::make_mat4x4(glMatMV) * glm::mat4(getWorldTransform());
+    std::array<GLfloat, 16> glMatMV{};
+    std::array<GLfloat, 16> glMatP{};
+    glGetFloatv(GL_MODELVIEW_MATRIX, glMatMV.data());
+    glGetFloatv(GL_PROJECTION_MATRIX, glMatP.data());
+    auto matMV = glm::make_mat4x4(glMatMV.data()) * glm::mat4(getWorldTransform());
 
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
@@ -128,7 +129,7 @@ bool DeepSpaceDot::Do() {
     mShader.Bind();
     glUniformMatrix4fv(
         mShader.GetUniformLocation("uMatModelView"), 1, GL_FALSE, glm::value_ptr(matMV));
-    glUniformMatrix4fv(mShader.GetUniformLocation("uMatProjection"), 1, GL_FALSE, glMatP);
+    glUniformMatrix4fv(mShader.GetUniformLocation("uMatProjection"), 1, GL_FALSE, glMatP.data());
     mShader.SetUniform(
         mShader.GetUniformLocation("uCcolor"), pColor.get()[0], pColor.get()[1], pColor.get()[2]);
     mShader.SetUniform(mShader.GetUniformLocation("uAspect"), fAspect);
@@ -146,7 +147,7 @@ bool DeepSpaceDot::Do() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool DeepSpaceDot::GetBoundingBox(VistaBoundingBox& bb) {
+bool DeepSpaceDot::GetBoundingBox(VistaBoundingBox&  /*bb*/) {
   return false;
 }
 

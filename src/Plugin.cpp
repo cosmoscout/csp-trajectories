@@ -27,7 +27,7 @@ EXPORT_FN cs::core::PluginBase* create() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EXPORT_FN void destroy(cs::core::PluginBase* pluginBase) {
-  delete pluginBase;
+  delete pluginBase; // NOLINT(cppcoreguidelines-owning-memory)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,8 +47,9 @@ void from_json(const nlohmann::json& j, Plugin::Settings::Trail& o) {
 
 void from_json(const nlohmann::json& j, Plugin::Settings::Trajectory& o) {
   nlohmann::json c = j.at("color");
-  for (int i = 0; i < 3; ++i)
+  for (int i = 0; i < 3; ++i) {
     o.mColor[i] = c.at(i);
+  }
 
   o.mDrawDot   = cs::core::parseOptional<bool>("drawDot", j);
   o.mDrawFlare = cs::core::parseOptional<bool>("drawFlare", j);
@@ -103,7 +104,7 @@ void Plugin::init() {
       flare->pColor =
           VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
 
-      auto sunFlareNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), flare.get());
+      auto* sunFlareNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), flare.get());
 
       VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
           sunFlareNode, static_cast<int>(cs::utils::DrawOrder::eAtmospheres) + 1);
@@ -123,7 +124,7 @@ void Plugin::init() {
       trajectory->pColor =
           VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
 
-      auto trajectoryNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), trajectory.get());
+      auto* trajectoryNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), trajectory.get());
       VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
           trajectoryNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
       mTrajectories.push_back(trajectory);
@@ -138,7 +139,7 @@ void Plugin::init() {
       dot->pColor =
           VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
 
-      auto deepSpaceDotNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), dot.get());
+      auto* deepSpaceDotNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), dot.get());
       VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
           deepSpaceDotNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
       mDeepSpaceDotNodes.emplace_back(deepSpaceDotNode);

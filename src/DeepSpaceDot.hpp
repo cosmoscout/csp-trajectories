@@ -35,8 +35,8 @@ class DeepSpaceDot : public cs::scene::CelestialObject, public IVistaOpenGLDraw 
   std::shared_ptr<Plugin::Properties> mProperties;
   VistaGLSLShader                     mShader;
 
-  static const std::string QUAD_VERT;
-  static const std::string QUAD_FRAG;
+  static const char* QUAD_VERT;
+  static const char* QUAD_FRAG;
 };
 } // namespace csp::trajectories
 #endif // CSP_TRAJECTORIES_DEEP_SPACE_DOT_HPP
