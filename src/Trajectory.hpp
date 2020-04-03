@@ -30,6 +30,13 @@ class Trajectory : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   Trajectory(std::shared_ptr<Plugin::Properties> properties, std::string sTargetCenter,
       std::string sTargetFrame, std::string const& sParentCenter, std::string const& sParentFrame,
       unsigned uSamples, double tStartExistence, double tEndExistence);
+
+  Trajectory(Trajectory const& other) = delete;
+  Trajectory(Trajectory&& other)      = delete;
+
+  Trajectory& operator=(Trajectory const& other) = delete;
+  Trajectory& operator=(Trajectory&& other) = delete;
+
   ~Trajectory() override = default;
 
   /// This is called automatically by the SolarSystem.

@@ -33,6 +33,13 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   SunFlare(std::shared_ptr<cs::core::GraphicsEngine> graphicsEngine,
       std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
       std::string const& sFrameName, double tStartExistence, double tEndExistence);
+
+  SunFlare(SunFlare const& other) = delete;
+  SunFlare(SunFlare&& other)      = delete;
+
+  SunFlare& operator=(SunFlare const& other) = delete;
+  SunFlare& operator=(SunFlare&& other) = delete;
+
   ~SunFlare() override = default;
 
   bool Do() override;
