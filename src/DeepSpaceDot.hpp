@@ -24,9 +24,15 @@ class DeepSpaceDot : public cs::scene::CelestialObject, public IVistaOpenGLDraw 
  public:
   cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1); ///< The color of the marker.
 
-  DeepSpaceDot(std::shared_ptr<Plugin::Properties> const& properties,
-      std::string const& sCenterName, std::string const& sFrameName, double tStartExistence,
-      double tEndExistence);
+  DeepSpaceDot(std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
+      std::string const& sFrameName, double tStartExistence, double tEndExistence);
+
+  DeepSpaceDot(DeepSpaceDot const& other) = delete;
+  DeepSpaceDot(DeepSpaceDot&& other)      = delete;
+
+  DeepSpaceDot& operator=(DeepSpaceDot const& other) = delete;
+  DeepSpaceDot& operator=(DeepSpaceDot&& other) = delete;
+
   ~DeepSpaceDot() override = default;
 
   bool Do() override;
@@ -36,8 +42,8 @@ class DeepSpaceDot : public cs::scene::CelestialObject, public IVistaOpenGLDraw 
   std::shared_ptr<Plugin::Properties> mProperties;
   VistaGLSLShader                     mShader;
 
-  static const std::string QUAD_VERT;
-  static const std::string QUAD_FRAG;
+  static const char* QUAD_VERT;
+  static const char* QUAD_FRAG;
 };
 } // namespace csp::trajectories
 #endif // CSP_TRAJECTORIES_DEEP_SPACE_DOT_HPP

@@ -30,9 +30,16 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   /// The color of the flare.
   cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1);
 
-  SunFlare(std::shared_ptr<cs::core::GraphicsEngine> const& graphicsEngine,
-      std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
+  SunFlare(std::shared_ptr<cs::core::GraphicsEngine> graphicsEngine,
+      std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
       std::string const& sFrameName, double tStartExistence, double tEndExistence);
+
+  SunFlare(SunFlare const& other) = delete;
+  SunFlare(SunFlare&& other)      = delete;
+
+  SunFlare& operator=(SunFlare const& other) = delete;
+  SunFlare& operator=(SunFlare&& other) = delete;
+
   ~SunFlare() override = default;
 
   bool Do() override;
@@ -44,8 +51,8 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   std::shared_ptr<Plugin::Properties> mProperties;
   VistaGLSLShader                     mShader;
 
-  static const std::string QUAD_VERT;
-  static const std::string QUAD_FRAG;
+  static const char* QUAD_VERT;
+  static const char* QUAD_FRAG;
 };
 
 } // namespace csp::trajectories
