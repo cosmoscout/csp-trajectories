@@ -14,7 +14,7 @@ namespace csp::trajectories {
 
 spdlog::logger& logger() {
   static auto logger = cs::utils::createLogger("csp-trajectories");
-  return *logger.get();
+  return *logger;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
