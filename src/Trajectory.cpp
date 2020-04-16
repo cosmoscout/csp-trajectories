@@ -113,7 +113,7 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
       mLastUpdateTime = tTime;
 
       if (completeRecalculation) {
-        logger()->debug("Recalculating trajectory for {}.", mTargetCenter);
+        logger().debug("Recalculating trajectory for {}.", mTargetCenter);
       }
     }
 

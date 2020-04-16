@@ -71,7 +71,7 @@ void from_json(const nlohmann::json& j, Plugin::Settings& o) {
 
 void Plugin::init() {
 
-  logger()->info("Loading plugin...");
+  logger().info("Loading plugin...");
 
   mPluginSettings = mAllSettings->mPlugins.at("csp-trajectories");
 
@@ -165,13 +165,13 @@ void Plugin::init() {
       "Enables or disables the rendering of a glare around the sun.",
       std::function([this](bool value) { mProperties->mEnableSunFlares = value; }));
 
-  logger()->info("Loading done.");
+  logger().info("Loading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::deInit() {
-  logger()->info("Unloading plugin...");
+  logger().info("Unloading plugin...");
 
   for (auto const& flare : mSunFlares) {
     mSolarSystem->unregisterAnchor(flare);
@@ -200,7 +200,7 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("trajectories.setEnablePlanetMarks");
   mGuiManager->getGui()->unregisterCallback("trajectories.setEnableSunFlare");
 
-  logger()->info("Unloading done.");
+  logger().info("Unloading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
