@@ -9,6 +9,7 @@
 #include "DeepSpaceDot.hpp"
 #include "SunFlare.hpp"
 #include "Trajectory.hpp"
+#include "logger.hpp"
 
 #include "../../../src/cs-core/GuiManager.hpp"
 #include "../../../src/cs-core/SolarSystem.hpp"
@@ -27,7 +28,7 @@ EXPORT_FN cs::core::PluginBase* create() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EXPORT_FN void destroy(cs::core::PluginBase* pluginBase) {
-  delete pluginBase;
+  delete pluginBase; // NOLINT(cppcoreguidelines-owning-memory)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,18 +79,9 @@ void to_json(nlohmann::json& j, Plugin::Settings const& o) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Plugin::Plugin()
-    : mProperties(std::make_shared<Properties>()) {
-
-  // Create default logger for this plugin.
-  spdlog::set_default_logger(cs::utils::logger::createLogger("csp-trajectories"));
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void Plugin::init() {
 
-  spdlog::info("Loading plugin...");
+  logger().info("Loading plugin...");
 
   mPluginSettings = mAllSettings->mPlugins.at("csp-trajectories");
 
@@ -112,7 +104,7 @@ void Plugin::init() {
       flare->pColor =
           VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
 
-      auto sunFlareNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), flare.get());
+      auto* sunFlareNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), flare.get());
 
       VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
           sunFlareNode, static_cast<int>(cs::utils::DrawOrder::eAtmospheres) + 1);
@@ -132,7 +124,7 @@ void Plugin::init() {
       trajectory->pColor =
           VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
 
-      auto trajectoryNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), trajectory.get());
+      auto* trajectoryNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), trajectory.get());
       VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
           trajectoryNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
       mTrajectories.push_back(trajectory);
@@ -147,7 +139,7 @@ void Plugin::init() {
       dot->pColor =
           VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
 
-      auto deepSpaceDotNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), dot.get());
+      auto* deepSpaceDotNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), dot.get());
       VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
           deepSpaceDotNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
       mDeepSpaceDotNodes.emplace_back(deepSpaceDotNode);
@@ -181,13 +173,13 @@ void Plugin::init() {
       "Enables or disables the rendering of a glare around the sun.",
       std::function([this](bool value) { mProperties->mEnableSunFlares = value; }));
 
-  spdlog::info("Loading done.");
+  logger().info("Loading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Plugin::deInit() {
-  spdlog::info("Unloading plugin...");
+  logger().info("Unloading plugin...");
 
   for (auto const& flare : mSunFlares) {
     mSolarSystem->unregisterAnchor(flare);
@@ -216,7 +208,7 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("trajectories.setEnablePlanetMarks");
   mGuiManager->getGui()->unregisterCallback("trajectories.setEnableSunFlare");
 
-  spdlog::info("Unloading done.");
+  logger().info("Unloading done.");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

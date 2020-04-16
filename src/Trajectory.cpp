@@ -8,21 +8,19 @@
 
 #include "../../../src/cs-scene/CelestialObserver.hpp"
 #include "../../../src/cs-utils/FrameTimings.hpp"
-#include "../../../src/cs-utils/logger.hpp"
+#include "logger.hpp"
 
 namespace csp::trajectories {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> const& properties,
-    std::string const& sTargetCenter, std::string const& sTargetFrame,
-    std::string const& sParentCenter, std::string const& sParentFrame, unsigned uSamples,
-    double tStartExistence, double tEndExistence)
+Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> properties, std::string sTargetCenter,
+    std::string sTargetFrame, std::string const& sParentCenter, std::string const& sParentFrame,
+    unsigned uSamples, double tStartExistence, double tEndExistence)
     : cs::scene::CelestialObject(sParentCenter, sParentFrame, tStartExistence, tEndExistence)
-    , mProperties(properties)
-    , mTargetCenter(sTargetCenter)
-    , mTargetFrame(sTargetFrame)
-    , mPoints()
+    , mProperties(std::move(properties))
+    , mTargetCenter(std::move(sTargetCenter))
+    , mTargetFrame(std::move(sTargetFrame))
     , mSamples(uSamples)
     , mStartIndex(0)
     , mLastUpdateTime(-1.0) {
@@ -32,8 +30,8 @@ Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> const& properties,
   });
 
   pColor.connect([this](VistaColor const& val) {
-    mTrajectory.setStartColor(glm::vec4(val[0], val[1], val[2], 1.f));
-    mTrajectory.setEndColor(glm::vec4(val[0], val[1], val[2], 0.f));
+    mTrajectory.setStartColor(glm::vec4(val[0], val[1], val[2], 1.F));
+    mTrajectory.setEndColor(glm::vec4(val[0], val[1], val[2], 0.F));
   });
 
   mTrajectory.setUseLinearDepthBuffer(true);
@@ -82,7 +80,7 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
 
             pVisibleRadius = std::max(glm::length(pos), pVisibleRadius.get());
 
-            mStartIndex = (mStartIndex + 1) % mSamples;
+            mStartIndex = (mStartIndex + 1) % static_cast<int>(mSamples);
           } catch (...) {
             // data might be unavailable
           }
@@ -103,7 +101,8 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
             mPoints[(mStartIndex - 1 + mSamples) % mSamples] =
                 glm::dvec4(pos.x, pos.y, pos.z, tSampleTime);
 
-            mStartIndex    = (mStartIndex - 1 + mSamples) % mSamples;
+            mStartIndex =
+                (mStartIndex - 1 + static_cast<int>(mSamples)) % static_cast<int>(mSamples);
             pVisibleRadius = std::max(glm::length(pos), pVisibleRadius.get());
           } catch (...) {
             // data might be unavailable
@@ -114,7 +113,7 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
       mLastUpdateTime = tTime;
 
       if (completeRecalculation) {
-        spdlog::debug("Recalculating trajectory for {}.", mTargetCenter);
+        logger().debug("Recalculating trajectory for {}.", mTargetCenter);
       }
     }
 
@@ -140,7 +139,7 @@ bool Trajectory::Do() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Trajectory::GetBoundingBox(VistaBoundingBox& bb) {
+bool Trajectory::GetBoundingBox(VistaBoundingBox& /*bb*/) {
   return false;
 }
 

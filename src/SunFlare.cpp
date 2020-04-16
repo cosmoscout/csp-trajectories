@@ -11,12 +11,13 @@
 #include "../../../src/cs-utils/utils.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <utility>
 
 namespace csp::trajectories {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const std::string SunFlare::QUAD_VERT = R"(
+const char* SunFlare::QUAD_VERT = R"(
 #version 330
 
 out vec2 vTexCoords;
@@ -71,7 +72,7 @@ void main()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const std::string SunFlare::QUAD_FRAG = R"(
+const char* SunFlare::QUAD_FRAG = R"(
 #version 330
 
 uniform vec3 uCcolor;
@@ -100,12 +101,12 @@ void main()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SunFlare::SunFlare(std::shared_ptr<cs::core::Settings> const& settings,
-    std::shared_ptr<Plugin::Properties> const& properties, std::string const& sCenterName,
+SunFlare::SunFlare(std::shared_ptr<cs::core::Settings> settings,
+    std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
     std::string const& sFrameName, double tStartExistence, double tEndExistence)
     : cs::scene::CelestialObject(sCenterName, sFrameName, tStartExistence, tEndExistence)
-    , mSettings(settings)
-    , mProperties(properties) {
+    , mSettings(std::move(settings))
+    , mProperties(std::move(properties)) {
   mShader.InitVertexShaderFromString(QUAD_VERT);
   mShader.InitFragmentShaderFromString(QUAD_FRAG);
   mShader.Link();
@@ -118,15 +119,16 @@ bool SunFlare::Do() {
       !mSettings->mGraphics.pEnableHDR.get()) {
     cs::utils::FrameTimings::ScopedTimer timer("SunFlare");
     // get viewport to draw dot with correct aspect ration
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    float fAspect = 1.f * viewport[2] / viewport[3];
+    std::array<GLint, 4> viewport{};
+    glGetIntegerv(GL_VIEWPORT, viewport.data());
+    float fAspect = 1.F * viewport.at(2) / viewport.at(3);
 
     // get modelview and projection matrices
-    GLfloat glMatMV[16], glMatP[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, &glMatMV[0]);
-    glGetFloatv(GL_PROJECTION_MATRIX, &glMatP[0]);
-    auto matMV = glm::make_mat4x4(glMatMV) * glm::mat4(getWorldTransform());
+    std::array<GLfloat, 16> glMatMV{};
+    std::array<GLfloat, 16> glMatP{};
+    glGetFloatv(GL_MODELVIEW_MATRIX, glMatMV.data());
+    glGetFloatv(GL_PROJECTION_MATRIX, glMatP.data());
+    auto matMV = glm::make_mat4x4(glMatMV.data()) * glm::mat4(getWorldTransform());
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
@@ -136,7 +138,7 @@ bool SunFlare::Do() {
     mShader.Bind();
     glUniformMatrix4fv(
         mShader.GetUniformLocation("uMatModelView"), 1, GL_FALSE, glm::value_ptr(matMV));
-    glUniformMatrix4fv(mShader.GetUniformLocation("uMatProjection"), 1, GL_FALSE, glMatP);
+    glUniformMatrix4fv(mShader.GetUniformLocation("uMatProjection"), 1, GL_FALSE, glMatP.data());
     mShader.SetUniform(
         mShader.GetUniformLocation("uCcolor"), pColor.get()[0], pColor.get()[1], pColor.get()[2]);
     mShader.SetUniform(mShader.GetUniformLocation("uAspect"), fAspect);
@@ -155,7 +157,7 @@ bool SunFlare::Do() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool SunFlare::GetBoundingBox(VistaBoundingBox& bb) {
+bool SunFlare::GetBoundingBox(VistaBoundingBox& /*bb*/) {
   return false;
 }
 
