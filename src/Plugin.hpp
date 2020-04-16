@@ -70,14 +70,12 @@ class Plugin : public cs::core::PluginBase {
     std::map<std::string, Trajectory> mTrajectories;
   };
 
-  Plugin();
-
   void init() override;
   void deInit() override;
 
  private:
   Settings                    mPluginSettings;
-  std::shared_ptr<Properties> mProperties;
+  std::shared_ptr<Properties> mProperties = std::make_shared<Properties>();
 
   std::vector<std::shared_ptr<Trajectory>>      mTrajectories;
   std::vector<std::shared_ptr<DeepSpaceDot>>    mDeepSpaceDots;
