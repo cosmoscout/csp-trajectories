@@ -65,10 +65,16 @@ void to_json(nlohmann::json& j, Plugin::Settings::Trajectory const& o) {
 
 void from_json(nlohmann::json const& j, Plugin::Settings& o) {
   cs::core::Settings::deserialize(j, "trajectories", o.mTrajectories);
+  cs::core::Settings::deserialize(j, "enableTrajectories", o.mEnableTrajectories);
+  cs::core::Settings::deserialize(j, "enableSunFlares", o.mEnableSunFlares);
+  cs::core::Settings::deserialize(j, "enablePlanetMarks", o.mEnablePlanetMarks);
 }
 
 void to_json(nlohmann::json& j, Plugin::Settings const& o) {
   cs::core::Settings::serialize(j, "trajectories", o.mTrajectories);
+  cs::core::Settings::serialize(j, "enableTrajectories", o.mEnableTrajectories);
+  cs::core::Settings::serialize(j, "enableSunFlares", o.mEnableSunFlares);
+  cs::core::Settings::serialize(j, "enablePlanetMarks", o.mEnablePlanetMarks);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
