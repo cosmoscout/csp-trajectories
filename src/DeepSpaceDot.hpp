@@ -27,14 +27,6 @@ class DeepSpaceDot : public cs::scene::CelestialObject, public IVistaOpenGLDraw 
   DeepSpaceDot(std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
       std::string const& sFrameName, double tStartExistence, double tEndExistence);
 
-  DeepSpaceDot(DeepSpaceDot const& other) = delete;
-  DeepSpaceDot(DeepSpaceDot&& other)      = delete;
-
-  DeepSpaceDot& operator=(DeepSpaceDot const& other) = delete;
-  DeepSpaceDot& operator=(DeepSpaceDot&& other) = delete;
-
-  ~DeepSpaceDot() override = default;
-
   bool Do() override;
   bool GetBoundingBox(VistaBoundingBox& bb) override;
 

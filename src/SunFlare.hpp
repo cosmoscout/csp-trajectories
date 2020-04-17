@@ -34,14 +34,6 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
       std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
       std::string const& sFrameName, double tStartExistence, double tEndExistence);
 
-  SunFlare(SunFlare const& other) = delete;
-  SunFlare(SunFlare&& other)      = delete;
-
-  SunFlare& operator=(SunFlare const& other) = delete;
-  SunFlare& operator=(SunFlare&& other) = delete;
-
-  ~SunFlare() override = default;
-
   bool Do() override;
   bool GetBoundingBox(VistaBoundingBox& bb) override;
 
