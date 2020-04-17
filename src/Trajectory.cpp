@@ -10,20 +10,26 @@
 #include "../../../src/cs-utils/FrameTimings.hpp"
 #include "logger.hpp"
 
+#include <VistaKernel/GraphicsManager/VistaGraphicsManager.h>
+#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
+#include <VistaKernel/GraphicsManager/VistaTransformNode.h>
+#include <VistaKernel/VistaSystem.h>
+#include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
+
 namespace csp::trajectories {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> properties, std::string sTargetCenter,
+Trajectory::Trajectory(std::shared_ptr<Plugin::Settings> pluginSettings, std::string sTargetCenter,
     std::string sTargetFrame, std::string const& sParentCenter, std::string const& sParentFrame,
-    unsigned uSamples, double tStartExistence, double tEndExistence)
+    double tStartExistence, double tEndExistence)
     : cs::scene::CelestialObject(sParentCenter, sParentFrame, tStartExistence, tEndExistence)
-    , mProperties(std::move(properties))
+    , mPluginSettings(std::move(pluginSettings))
     , mTargetCenter(std::move(sTargetCenter))
     , mTargetFrame(std::move(sTargetFrame))
-    , mSamples(uSamples)
     , mStartIndex(0)
     , mLastUpdateTime(-1.0) {
+
   pLength.connect([this](double val) {
     mPoints.clear();
     mTrajectory.setMaxAge(val * 24 * 60 * 60);
@@ -34,7 +40,22 @@ Trajectory::Trajectory(std::shared_ptr<Plugin::Properties> properties, std::stri
     mTrajectory.setEndColor(glm::vec4(val[0], val[1], val[2], 0.F));
   });
 
+  pSamples.connect([this](uint32_t /*value*/) { mPoints.clear(); });
+
   mTrajectory.setUseLinearDepthBuffer(true);
+
+  // Add to scenegraph.
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  mGLNode.reset(pSG->NewOpenGLNode(pSG->GetRoot(), this));
+  VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
+      mGLNode.get(), static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Trajectory::~Trajectory() {
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  pSG->GetRoot()->DisconnectChild(mGLNode.get());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,8 +66,8 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
   double dLengthSeconds = pLength.get() * 24.0 * 60.0 * 60.0;
   mTrailIsInExistence   = (tTime > mStartExistence && tTime < mEndExistence + dLengthSeconds);
 
-  if (mProperties->mEnableTrajectories.get() && mTrailIsInExistence) {
-    double dSampleLength = dLengthSeconds / mSamples;
+  if (mPluginSettings->mEnableTrajectories.get() && mTrailIsInExistence) {
+    double dSampleLength = dLengthSeconds / pSamples.get();
 
     cs::scene::CelestialAnchor target(mTargetCenter, mTargetFrame);
 
@@ -55,8 +76,8 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
       // make sure to re-sample entire trajectory if complete reset is required
       bool completeRecalculation = false;
 
-      if (mPoints.size() != mSamples) {
-        mPoints.resize(mSamples);
+      if (mPoints.size() != pSamples.get()) {
+        mPoints.resize(pSamples.get());
         completeRecalculation = true;
       }
 
@@ -80,7 +101,7 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
 
             pVisibleRadius = std::max(glm::length(pos), pVisibleRadius.get());
 
-            mStartIndex = (mStartIndex + 1) % static_cast<int>(mSamples);
+            mStartIndex = (mStartIndex + 1) % static_cast<int>(pSamples.get());
           } catch (...) {
             // data might be unavailable
           }
@@ -98,11 +119,11 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
             double tSampleTime =
                 glm::clamp(mLastSampleTime - dLengthSeconds, mStartExistence, mEndExistence);
             glm::dvec3 pos = getRelativePosition(tSampleTime, target);
-            mPoints[(mStartIndex - 1 + mSamples) % mSamples] =
+            mPoints[(mStartIndex - 1 + pSamples.get()) % pSamples.get()] =
                 glm::dvec4(pos.x, pos.y, pos.z, tSampleTime);
 
-            mStartIndex =
-                (mStartIndex - 1 + static_cast<int>(mSamples)) % static_cast<int>(mSamples);
+            mStartIndex = (mStartIndex - 1 + static_cast<int>(pSamples.get())) %
+                          static_cast<int>(pSamples.get());
             pVisibleRadius = std::max(glm::length(pos), pVisibleRadius.get());
           } catch (...) {
             // data might be unavailable
@@ -128,8 +149,56 @@ void Trajectory::update(double tTime, cs::scene::CelestialObserver const& oObs) 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Trajectory::setTargetCenterName(std::string const& sCenterName) {
+  if (mTargetCenter != sCenterName) {
+    mPoints.clear();
+    mTargetCenter = sCenterName;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Trajectory::setTargetFrameName(std::string const& sFrameName) {
+  if (mTargetFrame != sFrameName) {
+    mPoints.clear();
+    mTargetFrame = sFrameName;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::string const& Trajectory::getTargetCenterName() const {
+  return mTargetCenter;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::string const& Trajectory::getTargetFrameName() const {
+  return mTargetFrame;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Trajectory::setCenterName(std::string const& sCenterName) {
+  if (sCenterName != getCenterName()) {
+    mPoints.clear();
+  }
+  cs::scene::CelestialObject::setCenterName(sCenterName);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Trajectory::setFrameName(std::string const& sFrameName) {
+  if (sFrameName != getFrameName()) {
+    mPoints.clear();
+  }
+  cs::scene::CelestialObject::setFrameName(sFrameName);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool Trajectory::Do() {
-  if (mProperties->mEnableTrajectories.get() && pVisible.get() && mTrailIsInExistence) {
+  if (mPluginSettings->mEnableTrajectories.get() && pVisible.get() && mTrailIsInExistence) {
     cs::utils::FrameTimings::ScopedTimer timer("Trajectories");
     mTrajectory.Do();
   }

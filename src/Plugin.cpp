@@ -15,10 +15,6 @@
 #include "../../../src/cs-core/SolarSystem.hpp"
 #include "../../../src/cs-utils/logger.hpp"
 
-#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
-#include <VistaKernel/GraphicsManager/VistaTransformNode.h>
-#include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EXPORT_FN cs::core::PluginBase* create() {
@@ -40,15 +36,13 @@ namespace csp::trajectories {
 void from_json(nlohmann::json const& j, Plugin::Settings::Trail& o) {
   cs::core::Settings::deserialize(j, "length", o.mLength);
   cs::core::Settings::deserialize(j, "samples", o.mSamples);
-  cs::core::Settings::deserialize(j, "parentCenter", o.mParentCenter);
-  cs::core::Settings::deserialize(j, "parentFrame", o.mParentFrame);
+  cs::core::Settings::deserialize(j, "parent", o.mParent);
 }
 
 void to_json(nlohmann::json& j, Plugin::Settings::Trail const& o) {
   cs::core::Settings::serialize(j, "length", o.mLength);
   cs::core::Settings::serialize(j, "samples", o.mSamples);
-  cs::core::Settings::serialize(j, "parentCenter", o.mParentCenter);
-  cs::core::Settings::serialize(j, "parentFrame", o.mParentFrame);
+  cs::core::Settings::serialize(j, "parent", o.mParent);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,95 +77,27 @@ void Plugin::init() {
 
   logger().info("Loading plugin...");
 
-  mPluginSettings = mAllSettings->mPlugins.at("csp-trajectories");
-
-  for (auto const& settings : mPluginSettings.mTrajectories) {
-    auto anchor = mAllSettings->mAnchors.find(settings.first);
-
-    if (anchor == mAllSettings->mAnchors.end()) {
-      throw std::runtime_error(
-          "There is no Anchor \"" + settings.first + "\" defined in the settings.");
-    }
-
-    auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
-
-    // sun flare ---------------------------------------------------------------
-    if (settings.second.mDrawFlare && *settings.second.mDrawFlare) {
-      auto flare = std::make_shared<SunFlare>(mAllSettings, mProperties, anchor->second.mCenter,
-          anchor->second.mFrame, tStartExistence, tEndExistence);
-      mSolarSystem->registerAnchor(flare);
-
-      flare->pColor =
-          VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
-
-      auto* sunFlareNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), flare.get());
-
-      VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
-          sunFlareNode, static_cast<int>(cs::utils::DrawOrder::eAtmospheres) + 1);
-
-      mSunFlares.push_back(flare);
-      mSunFlareNodes.emplace_back(sunFlareNode);
-    }
-
-    if (settings.second.mTrail) {
-      auto trajectory =
-          std::make_shared<Trajectory>(mProperties, anchor->second.mCenter, anchor->second.mFrame,
-              settings.second.mTrail->mParentCenter, settings.second.mTrail->mParentFrame,
-              settings.second.mTrail->mSamples, tStartExistence, tEndExistence);
-      mSolarSystem->registerAnchor(trajectory);
-
-      trajectory->pLength = settings.second.mTrail->mLength;
-      trajectory->pColor =
-          VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
-
-      auto* trajectoryNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), trajectory.get());
-      VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
-          trajectoryNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
-      mTrajectories.push_back(trajectory);
-      mTrajectoryNodes.emplace_back(trajectoryNode);
-    }
-
-    if (settings.second.mDrawDot && *settings.second.mDrawDot) {
-      auto dot = std::make_shared<DeepSpaceDot>(mProperties, anchor->second.mCenter,
-          anchor->second.mFrame, tStartExistence, tEndExistence);
-      mSolarSystem->registerAnchor(dot);
-
-      dot->pColor =
-          VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
-
-      auto* deepSpaceDotNode = mSceneGraph->NewOpenGLNode(mSceneGraph->GetRoot(), dot.get());
-      VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
-          deepSpaceDotNode, static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
-      mDeepSpaceDotNodes.emplace_back(deepSpaceDotNode);
-
-      // do not perform distance culling for DeepSpaceDots
-      dot->pVisibleRadius = -1;
-
-      if (settings.second.mTrail) {
-        // hide dot as soon as the corresponding trajectory is hidden
-        dot->pVisible.connectFrom(mTrajectories.back()->pVisible);
-      } else {
-        dot->pVisible = true;
-      }
-
-      mDeepSpaceDots.push_back(dot);
-    }
-  }
+  mOnLoadConnection = mAllSettings->onLoad().connect([this]() { onLoad(); });
+  mOnSaveConnection = mAllSettings->onSave().connect(
+      [this]() { mAllSettings->mPlugins["csp-trajectories"] = *mPluginSettings; });
 
   mGuiManager->addSettingsSectionToSideBarFromHTML("Trajectories", "radio_button_unchecked",
       "../share/resources/gui/trajectories-settings.html");
 
   mGuiManager->getGui()->registerCallback("trajectories.setEnableTrajectories",
       "Enables or disables the rendering of trajectories.",
-      std::function([this](bool value) { mProperties->mEnableTrajectories = value; }));
+      std::function([this](bool value) { mPluginSettings->mEnableTrajectories = value; }));
 
   mGuiManager->getGui()->registerCallback("trajectories.setEnablePlanetMarks",
       "Enables or disables the rendering of points marking the position of the planets.",
-      std::function([this](bool value) { mProperties->mEnablePlanetMarks = value; }));
+      std::function([this](bool value) { mPluginSettings->mEnablePlanetMarks = value; }));
 
   mGuiManager->getGui()->registerCallback("trajectories.setEnableSunFlare",
       "Enables or disables the rendering of a glare around the sun.",
-      std::function([this](bool value) { mProperties->mEnableSunFlares = value; }));
+      std::function([this](bool value) { mPluginSettings->mEnableSunFlares = value; }));
+
+  // Load settings.
+  onLoad();
 
   logger().info("Loading done.");
 }
@@ -182,24 +108,15 @@ void Plugin::deInit() {
   logger().info("Unloading plugin...");
 
   for (auto const& flare : mSunFlares) {
-    mSolarSystem->unregisterAnchor(flare);
-  }
-  for (auto const& flareNode : mSunFlareNodes) {
-    mSceneGraph->GetRoot()->DisconnectChild(flareNode.get());
+    mSolarSystem->unregisterAnchor(flare.second);
   }
 
   for (auto const& trajectory : mTrajectories) {
-    mSolarSystem->unregisterAnchor(trajectory);
-  }
-  for (auto const& trajectoryNode : mTrajectoryNodes) {
-    mSceneGraph->GetRoot()->DisconnectChild(trajectoryNode.get());
+    mSolarSystem->unregisterAnchor(trajectory.second);
   }
 
   for (auto const& dot : mDeepSpaceDots) {
-    mSolarSystem->unregisterAnchor(dot);
-  }
-  for (auto const& deepSpaceDotNode : mDeepSpaceDotNodes) {
-    mSceneGraph->GetRoot()->DisconnectChild(deepSpaceDotNode.get());
+    mSolarSystem->unregisterAnchor(dot.second);
   }
 
   mGuiManager->removeSettingsSection("Trajectories");
@@ -208,7 +125,166 @@ void Plugin::deInit() {
   mGuiManager->getGui()->unregisterCallback("trajectories.setEnablePlanetMarks");
   mGuiManager->getGui()->unregisterCallback("trajectories.setEnableSunFlare");
 
+  mAllSettings->onLoad().disconnect(mOnLoadConnection);
+  mAllSettings->onSave().disconnect(mOnSaveConnection);
+
   logger().info("Unloading done.");
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Plugin::onLoad() {
+
+  // Read settings from JSON.
+  from_json(mAllSettings->mPlugins.at("csp-trajectories"), *mPluginSettings);
+
+  // We just recreate all SunFlares and DeepSpaceDots as they are quite cheap to construct. So
+  // delete all existing ones first.
+  for (auto const& flare : mSunFlares) {
+    mSolarSystem->unregisterAnchor(flare.second);
+  }
+  for (auto const& dot : mDeepSpaceDots) {
+    mSolarSystem->unregisterAnchor(dot.second);
+  }
+  mSunFlares.clear();
+  mDeepSpaceDots.clear();
+
+  // Now we go through all configured trajectories and create all required SunFlares and
+  // DeepSpaceDots.
+  for (auto const& settings : mPluginSettings->mTrajectories) {
+    auto anchor = mAllSettings->mAnchors.find(settings.first);
+
+    if (anchor == mAllSettings->mAnchors.end()) {
+      logger().warn("Cannot add sun flare or planet mark for '{}': There is no such anchor defined "
+                    "in the settings!",
+          settings.first);
+      continue;
+    }
+
+    auto [tStartExistence, tEndExistence] = anchor->second.getExistence();
+
+    // Add the SunFlare.
+    if (settings.second.mDrawFlare.value_or(false)) {
+      auto flare = std::make_shared<SunFlare>(mAllSettings, mPluginSettings, anchor->second.mCenter,
+          anchor->second.mFrame, tStartExistence, tEndExistence);
+      mSolarSystem->registerAnchor(flare);
+
+      flare->pColor =
+          VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
+
+      mSunFlares[settings.first] = flare;
+    }
+
+    // Add the DeepSpaceDot.
+    if (settings.second.mDrawDot.value_or(false)) {
+      auto dot = std::make_shared<DeepSpaceDot>(mPluginSettings, anchor->second.mCenter,
+          anchor->second.mFrame, tStartExistence, tEndExistence);
+      mSolarSystem->registerAnchor(dot);
+
+      dot->pColor =
+          VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
+
+      // do not perform distance culling for DeepSpaceDots
+      dot->pVisibleRadius = -1;
+      dot->pVisible       = true;
+
+      mDeepSpaceDots[settings.first] = dot;
+    }
+  }
+
+  // For the trajectories we try to re-use as many as possible as they are quite expensive to
+  // construct. First try to re-configure existing trajectories. A trajectory is re-used if it
+  // shares the same target anchor name.
+  auto trajectory = mTrajectories.begin();
+  while (trajectory != mTrajectories.end()) {
+    auto settings = mPluginSettings->mTrajectories.find(trajectory->first);
+
+    // If there are settings for this trajectory, reconfigure it.
+    if (settings != mPluginSettings->mTrajectories.end() && settings->second.mTrail) {
+      auto parentAnchor = mAllSettings->mAnchors.find(settings->second.mTrail->mParent);
+      auto targetAnchor = mAllSettings->mAnchors.find(settings->first);
+
+      // Ignore wrongly configured trajectories for now. The error will be emitted when we try to
+      // add this as a new trajectory.
+      if (parentAnchor != mAllSettings->mAnchors.end() &&
+          targetAnchor != mAllSettings->mAnchors.end()) {
+
+        auto [parentStartExistence, parentEndExistence] = parentAnchor->second.getExistence();
+        auto [targetStartExistence, targetEndExistence] = targetAnchor->second.getExistence();
+        trajectory->second->setStartExistence(std::max(parentStartExistence, targetStartExistence));
+        trajectory->second->setEndExistence(std::min(parentEndExistence, targetEndExistence));
+        trajectory->second->setCenterName(parentAnchor->second.mCenter);
+        trajectory->second->setFrameName(parentAnchor->second.mFrame);
+        trajectory->second->setTargetCenterName(targetAnchor->second.mCenter);
+        trajectory->second->setTargetFrameName(targetAnchor->second.mFrame);
+        trajectory->second->pSamples = settings->second.mTrail->mSamples;
+        trajectory->second->pLength  = settings->second.mTrail->mLength;
+        trajectory->second->pColor   = VistaColor(
+            settings->second.mColor.r, settings->second.mColor.g, settings->second.mColor.b);
+
+        ++trajectory;
+
+        continue;
+      }
+    }
+
+    // Else delete it.
+    mSolarSystem->unregisterAnchor(trajectory->second);
+    trajectory = mTrajectories.erase(trajectory);
+  }
+
+  // Then create all new trajectories.
+  for (auto&& settings : mPluginSettings->mTrajectories) {
+    if (settings.second.mTrail) {
+      auto existing = std::find_if(mTrajectories.begin(), mTrajectories.end(),
+          [&](auto val) { return val.first == settings.first; });
+      if (existing != mTrajectories.end()) {
+        continue;
+      }
+
+      auto parentAnchor = mAllSettings->mAnchors.find(settings.second.mTrail->mParent);
+      auto targetAnchor = mAllSettings->mAnchors.find(settings.first);
+
+      if (parentAnchor == mAllSettings->mAnchors.end()) {
+        logger().warn("Cannot add trajectory for '{}': There is no parent anchor '{}' defined in "
+                      "the settings!",
+            settings.first, settings.second.mTrail->mParent);
+        continue;
+      }
+
+      if (targetAnchor == mAllSettings->mAnchors.end()) {
+        logger().warn(
+            "Cannot add trajectory for '{}': There is no such anchor defined in the settings!",
+            settings.first);
+        continue;
+      }
+
+      auto [parentStartExistence, parentEndExistence] = parentAnchor->second.getExistence();
+      auto [targetStartExistence, targetEndExistence] = targetAnchor->second.getExistence();
+
+      auto trajectory = std::make_shared<Trajectory>(mPluginSettings, targetAnchor->second.mCenter,
+          targetAnchor->second.mFrame, parentAnchor->second.mCenter, parentAnchor->second.mFrame,
+          std::max(parentStartExistence, targetStartExistence),
+          std::min(parentEndExistence, targetEndExistence));
+
+      trajectory->pSamples = settings.second.mTrail->mSamples;
+      trajectory->pLength  = settings.second.mTrail->mLength;
+      trajectory->pColor =
+          VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
+
+      // Change visibility of dots together with trajectory.
+      trajectory->pVisible.connectAndTouch([this, anchorName = settings.first](bool visible) {
+        auto dot = mDeepSpaceDots.find(anchorName);
+        if (dot != mDeepSpaceDots.end()) {
+          dot->second->pVisible = visible;
+        }
+      });
+
+      mSolarSystem->registerAnchor(trajectory);
+
+      mTrajectories[settings.first] = trajectory;
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
