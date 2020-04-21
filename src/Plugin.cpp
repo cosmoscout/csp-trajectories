@@ -242,9 +242,7 @@ void Plugin::onLoad() {
   // Then create all new trajectories.
   for (auto&& settings : mPluginSettings->mTrajectories) {
     if (settings.second.mTrail) {
-      auto existing = std::find_if(mTrajectories.begin(), mTrajectories.end(),
-          [&](auto val) { return val.first == settings.first; });
-      if (existing != mTrajectories.end()) {
+      if (mTrajectories.find(settings.first) != mTrajectories.end()) {
         continue;
       }
 
@@ -288,7 +286,7 @@ void Plugin::onLoad() {
 
       mSolarSystem->registerAnchor(trajectory);
 
-      mTrajectories[settings.first] = trajectory;
+      mTrajectories.emplace(settings.first, trajectory);
     }
   }
 }
