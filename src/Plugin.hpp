@@ -28,8 +28,6 @@ class Plugin : public cs::core::PluginBase {
   struct Settings {
     /// Settings for a trail behind an object.
     struct Trail {
-      Trail() = default;
-
       /// The length of the trail in days.
       double mLength{};
 
