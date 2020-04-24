@@ -28,13 +28,14 @@ class Plugin : public cs::core::PluginBase {
   struct Settings {
     /// Settings for a trail behind an object.
     struct Trail {
+      Trail() = default;
 
       /// The length of the trail in days.
       double mLength{};
 
       /// The amount of samples that make up the trail. The higher the better it looks, but the
       /// worse the performance gets.
-      int mSamples{};
+      int32_t mSamples{};
 
       /// The name of the anchor this trail is drawn relative to.
       std::string mParent;
