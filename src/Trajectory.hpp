@@ -28,7 +28,7 @@ class Trajectory : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   cs::utils::Property<uint32_t> pSamples = 100;
 
   /// The color of the trajectory.
-  cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1);
+  cs::utils::Property<glm::vec3> pColor = glm::vec3(1, 1, 1);
 
   Trajectory(std::shared_ptr<Plugin::Settings> pluginSettings, std::string sTargetCenter,
       std::string sTargetFrame, std::string const& sParentCenter, std::string const& sParentFrame,

@@ -201,8 +201,7 @@ void Plugin::onLoad() {
   // For the trajectories we try to re-use as many as possible as they are quite expensive to
   // construct. First try to re-configure existing trajectories. A trajectory is re-used if it
   // shares the same target anchor name.
-  auto trajectory = mTrajectories.begin();
-  while (trajectory != mTrajectories.end()) {
+  for (auto trajectory = mTrajectories.begin(); trajectory != mTrajectories.end();) {
     auto settings = mPluginSettings->mTrajectories.find(trajectory->first);
 
     // If there are settings for this trajectory, reconfigure it.
@@ -225,8 +224,7 @@ void Plugin::onLoad() {
         trajectory->second->setTargetFrameName(targetAnchor->second.mFrame);
         trajectory->second->pSamples = settings->second.mTrail->mSamples;
         trajectory->second->pLength  = settings->second.mTrail->mLength;
-        trajectory->second->pColor   = VistaColor(
-            settings->second.mColor.r, settings->second.mColor.g, settings->second.mColor.b);
+        trajectory->second->pColor   = settings->second.mColor;
 
         ++trajectory;
 
@@ -273,8 +271,7 @@ void Plugin::onLoad() {
 
       trajectory->pSamples = settings.second.mTrail->mSamples;
       trajectory->pLength  = settings.second.mTrail->mLength;
-      trajectory->pColor =
-          VistaColor(settings.second.mColor.r, settings.second.mColor.g, settings.second.mColor.b);
+      trajectory->pColor   = settings.second.mColor;
 
       // Change visibility of dots together with trajectory.
       trajectory->pVisible.connectAndTouch([this, anchorName = settings.first](bool visible) {

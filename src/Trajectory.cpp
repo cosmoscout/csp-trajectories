@@ -35,9 +35,9 @@ Trajectory::Trajectory(std::shared_ptr<Plugin::Settings> pluginSettings, std::st
     mTrajectory.setMaxAge(val * 24 * 60 * 60);
   });
 
-  pColor.connect([this](VistaColor const& val) {
-    mTrajectory.setStartColor(glm::vec4(val[0], val[1], val[2], 1.F));
-    mTrajectory.setEndColor(glm::vec4(val[0], val[1], val[2], 0.F));
+  pColor.connect([this](glm::vec3 const& val) {
+    mTrajectory.setStartColor(glm::vec4(val, 1.F));
+    mTrajectory.setEndColor(glm::vec4(val, 0.F));
   });
 
   pSamples.connect([this](uint32_t /*value*/) { mPoints.clear(); });
