@@ -30,11 +30,11 @@ class Plugin : public cs::core::PluginBase {
     struct Trail {
 
       /// The length of the trail in days.
-      double mLength{};
+      double mLength = 0.0;
 
       /// The amount of samples that make up the trail. The higher the better it looks, but the
       /// worse the performance gets.
-      int32_t mSamples{};
+      int32_t mSamples = 0;
 
       /// The name of the anchor this trail is drawn relative to.
       std::string mParent;
