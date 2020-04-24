@@ -240,7 +240,7 @@ void Plugin::onLoad() {
   }
 
   // Then create all new trajectories.
-  for (auto&& settings : mPluginSettings->mTrajectories) {
+  for (auto const& settings : mPluginSettings->mTrajectories) {
     if (settings.second.mTrail) {
       if (mTrajectories.find(settings.first) != mTrajectories.end()) {
         continue;
