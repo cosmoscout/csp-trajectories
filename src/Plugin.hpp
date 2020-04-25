@@ -26,21 +26,25 @@ class Trajectory;
 class Plugin : public cs::core::PluginBase {
  public:
   struct Settings {
-    /// Settings for a trail behind an object.
-    struct Trail {
-      /// The length of the trail in days.
-      double mLength{};
-
-      /// The amount of samples that make up the trail. The higher the better it looks, but the
-      /// worse the performance gets.
-      int32_t mSamples{};
-
-      /// The name of the anchor this trail is drawn relative to.
-      std::string mParent;
-    };
 
     /// The root settings for a single trajectory.
     struct Trajectory {
+      /// Settings for a trail behind an object.
+      struct Trail {
+
+        /// Without this, some versions of clang claim this type to be non-default-constructible...
+        Trail() {
+        }
+        /// The length of the trail in days.
+        double mLength{};
+
+        /// The amount of samples that make up the trail. The higher the better it looks, but the
+        /// worse the performance gets.
+        int32_t mSamples{};
+
+        /// The name of the anchor this trail is drawn relative to.
+        std::string mParent;
+      };
 
       /// Specifies the color of the trail and dot.
       glm::vec3 mColor{};

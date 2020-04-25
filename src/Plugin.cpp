@@ -33,13 +33,13 @@ namespace csp::trajectories {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void from_json(nlohmann::json const& j, Plugin::Settings::Trail& o) {
+void from_json(nlohmann::json const& j, Plugin::Settings::Trajectory::Trail& o) {
   cs::core::Settings::deserialize(j, "length", o.mLength);
   cs::core::Settings::deserialize(j, "samples", o.mSamples);
   cs::core::Settings::deserialize(j, "parent", o.mParent);
 }
 
-void to_json(nlohmann::json& j, Plugin::Settings::Trail const& o) {
+void to_json(nlohmann::json& j, Plugin::Settings::Trajectory::Trail const& o) {
   cs::core::Settings::serialize(j, "length", o.mLength);
   cs::core::Settings::serialize(j, "samples", o.mSamples);
   cs::core::Settings::serialize(j, "parent", o.mParent);
