@@ -25,36 +25,29 @@ class Trajectory;
 /// for details.
 class Plugin : public cs::core::PluginBase {
  public:
-  /// Runtime properties for enabling and disabling features.
-  struct Properties {
-    cs::utils::Property<bool> mEnableTrajectories = true; ///< Toggles trajectories at runtime.
-    cs::utils::Property<bool> mEnableSunFlares    = true; ///< Toggles flares at runtime.
-    cs::utils::Property<bool> mEnablePlanetMarks  = true; ///< Toggles dots at runtime.
-  };
-
   struct Settings {
-    /// Settings for a trail behind an object.
-    struct Trail {
-
-      /// The length of the trail in days.
-      double mLength;
-
-      /// The amount of samples that make up the trail. The higher the better it looks, but the
-      /// worse the performance gets.
-      int32_t mSamples;
-
-      /// The spice name of the parents center.
-      std::string mParentCenter;
-
-      /// The spice name of the parents frame.
-      std::string mParentFrame;
-    };
 
     /// The root settings for a single trajectory.
     struct Trajectory {
+      /// Settings for a trail behind an object.
+      struct Trail {
+
+        /// Without this, some versions of clang claim this type to be non-default-constructible...
+        Trail() {
+        }
+        /// The length of the trail in days.
+        double mLength{};
+
+        /// The amount of samples that make up the trail. The higher the better it looks, but the
+        /// worse the performance gets.
+        int32_t mSamples{};
+
+        /// The name of the anchor this trail is drawn relative to.
+        std::string mParent;
+      };
 
       /// Specifies the color of the trail and dot.
-      glm::vec3 mColor;
+      glm::vec3 mColor{};
 
       /// If available and true a dot will indicate the objects position.
       std::optional<bool> mDrawDot;
@@ -68,21 +61,30 @@ class Plugin : public cs::core::PluginBase {
 
     /// All trajectories with their name as key.
     std::map<std::string, Trajectory> mTrajectories;
+
+    /// Toggles trajectories at runtime.
+    cs::utils::DefaultProperty<bool> mEnableTrajectories{true};
+
+    /// Toggles flares at runtime.
+    cs::utils::DefaultProperty<bool> mEnableSunFlares{true};
+
+    /// Toggles dots at runtime.
+    cs::utils::DefaultProperty<bool> mEnablePlanetMarks{true};
   };
 
   void init() override;
   void deInit() override;
 
  private:
-  Settings                    mPluginSettings;
-  std::shared_ptr<Properties> mProperties = std::make_shared<Properties>();
+  void onLoad();
 
-  std::vector<std::shared_ptr<Trajectory>>      mTrajectories;
-  std::vector<std::shared_ptr<DeepSpaceDot>>    mDeepSpaceDots;
-  std::vector<std::shared_ptr<SunFlare>>        mSunFlares;
-  std::vector<std::unique_ptr<VistaOpenGLNode>> mTrajectoryNodes;
-  std::vector<std::unique_ptr<VistaOpenGLNode>> mDeepSpaceDotNodes;
-  std::vector<std::unique_ptr<VistaOpenGLNode>> mSunFlareNodes;
+  std::shared_ptr<Settings>                          mPluginSettings = std::make_shared<Settings>();
+  std::map<std::string, std::shared_ptr<Trajectory>> mTrajectories;
+  std::map<std::string, std::shared_ptr<DeepSpaceDot>> mDeepSpaceDots;
+  std::map<std::string, std::shared_ptr<SunFlare>>     mSunFlares;
+
+  int mOnLoadConnection = -1;
+  int mOnSaveConnection = -1;
 };
 
 } // namespace csp::trajectories

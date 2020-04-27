@@ -6,9 +6,15 @@
 
 #include "SunFlare.hpp"
 
-#include "../../../src/cs-core/GraphicsEngine.hpp"
+#include "../../../src/cs-core/Settings.hpp"
 #include "../../../src/cs-utils/FrameTimings.hpp"
 #include "../../../src/cs-utils/utils.hpp"
+
+#include <VistaKernel/GraphicsManager/VistaGraphicsManager.h>
+#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
+#include <VistaKernel/GraphicsManager/VistaTransformNode.h>
+#include <VistaKernel/VistaSystem.h>
+#include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
@@ -101,22 +107,35 @@ void main()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SunFlare::SunFlare(std::shared_ptr<cs::core::GraphicsEngine> graphicsEngine,
-    std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
+SunFlare::SunFlare(std::shared_ptr<cs::core::Settings> settings,
+    std::shared_ptr<Plugin::Settings> pluginSettings, std::string const& sCenterName,
     std::string const& sFrameName, double tStartExistence, double tEndExistence)
     : cs::scene::CelestialObject(sCenterName, sFrameName, tStartExistence, tEndExistence)
-    , mGraphicsEngine(std::move(graphicsEngine))
-    , mProperties(std::move(properties)) {
+    , mSettings(std::move(settings))
+    , mPluginSettings(std::move(pluginSettings)) {
   mShader.InitVertexShaderFromString(QUAD_VERT);
   mShader.InitFragmentShaderFromString(QUAD_FRAG);
   mShader.Link();
+
+  // Add to scenegraph.
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  mGLNode.reset(pSG->NewOpenGLNode(pSG->GetRoot(), this));
+  VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
+      mGLNode.get(), static_cast<int>(cs::utils::DrawOrder::eAtmospheres) + 1);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SunFlare::~SunFlare() {
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  pSG->GetRoot()->DisconnectChild(mGLNode.get());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool SunFlare::Do() {
-  if (mProperties->mEnableSunFlares.get() && getIsInExistence() &&
-      !mGraphicsEngine->pEnableHDR.get()) {
+  if (mPluginSettings->mEnableSunFlares.get() && getIsInExistence() &&
+      !mSettings->mGraphics.pEnableHDR.get()) {
     cs::utils::FrameTimings::ScopedTimer timer("SunFlare");
     // get viewport to draw dot with correct aspect ration
     std::array<GLint, 4> viewport{};

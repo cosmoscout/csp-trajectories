@@ -17,7 +17,7 @@
 #include <glm/glm.hpp>
 
 namespace cs::core {
-class GraphicsEngine;
+class Settings;
 } // namespace cs::core
 
 namespace csp::trajectories {
@@ -30,26 +30,28 @@ class SunFlare : public cs::scene::CelestialObject, public IVistaOpenGLDraw {
   /// The color of the flare.
   cs::utils::Property<VistaColor> pColor = VistaColor(1, 1, 1);
 
-  SunFlare(std::shared_ptr<cs::core::GraphicsEngine> graphicsEngine,
-      std::shared_ptr<Plugin::Properties> properties, std::string const& sCenterName,
+  SunFlare(std::shared_ptr<cs::core::Settings> settings,
+      std::shared_ptr<Plugin::Settings> pluginSettings, std::string const& sCenterName,
       std::string const& sFrameName, double tStartExistence, double tEndExistence);
 
   SunFlare(SunFlare const& other) = delete;
-  SunFlare(SunFlare&& other)      = delete;
+  SunFlare(SunFlare&& other)      = default;
 
   SunFlare& operator=(SunFlare const& other) = delete;
-  SunFlare& operator=(SunFlare&& other) = delete;
+  SunFlare& operator=(SunFlare&& other) = default;
 
-  ~SunFlare() override = default;
+  ~SunFlare() override;
 
   bool Do() override;
   bool GetBoundingBox(VistaBoundingBox& bb) override;
 
  private:
-  std::shared_ptr<cs::core::GraphicsEngine> mGraphicsEngine;
+  std::shared_ptr<cs::core::Settings> mSettings;
+  std::shared_ptr<Plugin::Settings>   mPluginSettings;
 
-  std::shared_ptr<Plugin::Properties> mProperties;
-  VistaGLSLShader                     mShader;
+  std::unique_ptr<VistaOpenGLNode> mGLNode;
+
+  VistaGLSLShader mShader;
 
   static const char* QUAD_VERT;
   static const char* QUAD_FRAG;

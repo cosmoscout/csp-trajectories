@@ -9,6 +9,12 @@
 #include "../../../src/cs-utils/FrameTimings.hpp"
 #include "../../../src/cs-utils/utils.hpp"
 
+#include <VistaKernel/GraphicsManager/VistaGraphicsManager.h>
+#include <VistaKernel/GraphicsManager/VistaSceneGraph.h>
+#include <VistaKernel/GraphicsManager/VistaTransformNode.h>
+#include <VistaKernel/VistaSystem.h>
+#include <VistaKernelOpenSGExt/VistaOpenSGMaterialTools.h>
+
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
 
@@ -94,20 +100,34 @@ void main()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DeepSpaceDot::DeepSpaceDot(std::shared_ptr<Plugin::Properties> properties,
+DeepSpaceDot::DeepSpaceDot(std::shared_ptr<Plugin::Settings> pluginSettings,
     std::string const& sCenterName, std::string const& sFrameName, double tStartExistence,
     double tEndExistence)
     : cs::scene::CelestialObject(sCenterName, sFrameName, tStartExistence, tEndExistence)
-    , mProperties(std::move(properties)) {
+    , mPluginSettings(std::move(pluginSettings)) {
+
   mShader.InitVertexShaderFromString(QUAD_VERT);
   mShader.InitFragmentShaderFromString(QUAD_FRAG);
   mShader.Link();
+
+  // Add to scenegraph.
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  mGLNode.reset(pSG->NewOpenGLNode(pSG->GetRoot(), this));
+  VistaOpenSGMaterialTools::SetSortKeyOnSubtree(
+      mGLNode.get(), static_cast<int>(cs::utils::DrawOrder::eTransparentItems) - 1);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DeepSpaceDot::~DeepSpaceDot() {
+  VistaSceneGraph* pSG = GetVistaSystem()->GetGraphicsManager()->GetSceneGraph();
+  pSG->GetRoot()->DisconnectChild(mGLNode.get());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool DeepSpaceDot::Do() {
-  if (mProperties->mEnablePlanetMarks.get() && getIsInExistence() && pVisible.get()) {
+  if (mPluginSettings->mEnablePlanetMarks.get() && getIsInExistence() && pVisible.get()) {
     cs::utils::FrameTimings::ScopedTimer timer("Planet Marks");
     // get viewport to draw dot with correct aspect ration
     std::array<GLint, 4> viewport{};
