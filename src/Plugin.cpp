@@ -93,14 +93,23 @@ void Plugin::init() {
   mGuiManager->getGui()->registerCallback("trajectories.setEnableTrajectories",
       "Enables or disables the rendering of trajectories.",
       std::function([this](bool value) { mPluginSettings->mEnableTrajectories = value; }));
+  mPluginSettings->mEnableTrajectories.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("trajectories.setEnableTrajectories", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("trajectories.setEnablePlanetMarks",
       "Enables or disables the rendering of points marking the position of the planets.",
       std::function([this](bool value) { mPluginSettings->mEnablePlanetMarks = value; }));
+  mPluginSettings->mEnablePlanetMarks.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("trajectories.setEnablePlanetMarks", enable);
+  });
 
   mGuiManager->getGui()->registerCallback("trajectories.setEnableSunFlare",
       "Enables or disables the rendering of a glare around the sun.",
       std::function([this](bool value) { mPluginSettings->mEnableSunFlares = value; }));
+  mPluginSettings->mEnableSunFlares.connectAndTouch([this](bool enable) {
+    mGuiManager->setCheckboxValue("trajectories.setEnableSunFlare", enable);
+  });
 
   // Load settings.
   onLoad();
